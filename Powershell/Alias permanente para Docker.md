@@ -1,5 +1,3 @@
-# Alias permanente para Docker
-
 Agregar dentro del perfil:
 
 ```powershell

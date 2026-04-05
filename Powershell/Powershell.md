@@ -60,3 +60,7 @@ Get-ChildItem
 ## Puedes ver también:
 [[Alias en Powershell]]
 [[Alias permanente para Docker]]
+[[Git]]
+[[GitHub]]
+[[Azure CLI]]
+[[AWS CLI]]

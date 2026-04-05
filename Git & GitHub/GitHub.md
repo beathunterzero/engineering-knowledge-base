@@ -131,3 +131,10 @@ Por eso es importante documentar:
 - Sincronizar mi vault de Obsidian
 - Tener un repositorio público como referencia profesional
 - Practicar buenas prácticas de control de versiones
+****
+## Puedes ver también:
+[[Visibilidad de repositorios]]
+[[Estructura de un repositorio]]
+[[Token Personal (PAT)]]
+[[Autenticación SSH con GitHub]]
+

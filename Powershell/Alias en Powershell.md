@@ -1,5 +1,3 @@
-# Alias en PowerShell
-
 PowerShell permite crear alias para simplificar comandos.
 
 **Ejemplos:**
