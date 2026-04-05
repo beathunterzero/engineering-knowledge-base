@@ -52,3 +52,4 @@ Dentro de `src/`, nunca en la raíz.
 - Cuando se trata de scripts directos, evitar usar `src/` para limpieza en ejecución del script.
 *****
 ## También puedes ver:
+[[Gestión de dependencias en Python]]
