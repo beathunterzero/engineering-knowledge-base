@@ -137,4 +137,5 @@ Por eso es importante documentar:
 [[Estructura de un repositorio]]
 [[Token Personal (PAT)]]
 [[Autenticación SSH con GitHub]]
+[[Mover repositorios Git y GitHub de manera local]]
 
