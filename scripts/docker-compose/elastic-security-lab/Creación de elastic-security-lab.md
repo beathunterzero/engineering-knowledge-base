@@ -1,364 +1,151 @@
-# Creación de la estructura inicial del proyecto
+## 1. Introducción y Propósito
 
-Primero se creó el directorio raíz del laboratorio:
+El **Elastic Security Lab** es un entorno SIEM (_Security Information and Event Management_) diseñado para centralizar, analizar y visualizar logs. Usamos la versión **8.17.10 (LTS)** por su estabilidad en **WSL2**.
 
-```bash
-mkdir elastic-security-lab
-cd elastic-security-lab
-```
+## 2. Estructura de Directorios (FileSystem)
 
-Luego se creó el directorio donde se almacenará la arquitectura del proyecto:
+La organización es jerárquica para facilitar la escalabilidad del laboratorio:
 
-```bash
-mkdir -p docs/architecture
-```
-
-En este directorio se diseñó el diagrama de arquitectura (`elastic-security-lab.excalidraw`) y se exportó como imagen (`elastic-security-lab.png`).
-
-<img width="892" height="593" alt="image" src="https://github.com/user-attachments/assets/0d2d280a-c743-4b08-b24b-29d5e15972ea" />
-
-
-# Creación del resto de directorios
-
-Se creó la estructura de datasets, organizada por plataforma:
+Bash
 
 ```bash
-mkdir -p datasets/aws/cloudtrail
-mkdir -p datasets/aws/guardduty
-mkdir -p datasets/aws/s3access
-mkdir -p datasets/aws/vpcflow
-
-mkdir -p datasets/azure/activity
-mkdir -p datasets/azure/audit
-mkdir -p datasets/azure/firewall
-mkdir -p datasets/azure/signin
-
-mkdir -p datasets/linux
-mkdir -p datasets/windows
-mkdir -p datasets/firewall
+elastic-security-lab/
+├── datasets/            # Repositorio de logs crudos
+│   ├── aws/             # Cloudtrail, Guardduty, S3, VPC
+│   ├── azure/           # Activity, Audit, Firewall, Signin
+│   ├── linux/           # Logs de sistemas Linux
+│   ├── windows/         # Eventos de Windows
+│   └── firewall/        # Tráfico de red
+├── docs/                # Documentación y Diagramas
+│   └── architecture/    # Diagramas Excalidraw y PNG
+├── filebeat/            # Configuración del agente recolector
+│   └── filebeat.yml
+└── docker-compose.yml   # Orquestador del Stack
 ```
 
-También se creó el directorio para Filebeat:
 
-```bash
-mkdir filebeat
-```
+- `datasets/`: Repositorio organizado por plataforma (AWS, Azure, Linux, Windows, Firewall).
+    
+- `docs/architecture/`: Diagramas de diseño (`.excalidraw` y `.png`).
+    
+- `filebeat/`: Archivos de configuración del agente de ingesta.
+    
+- `docker-compose.yml`: El manifiesto que orquesta todo el stack.
+    
+
+---
+
+## 3. Desglose Técnico: docker-compose.yml
+
+### 3.1 Servicio: Elasticsearch (es01)
+
+Es el motor de base de datos y búsqueda.
+
+- `image: ...:8.17.10`: Versión LTS estable para abril 2026.
+    
+- `container_name: es01`: Identificador único del contenedor.
+    
+- `restart: unless-stopped`: Garantiza que el servicio suba tras un reinicio del host.
+    
+- `environment`:
+    
+    - `node.name=es01`: Nombre del nodo en el cluster.
+        
+    - `discovery.type=single-node`: Configuración para laboratorio (un solo servidor).
+        
+    - `xpack.security.enabled=true`: Habilita el control de accesos.
+        
+    - `ELASTIC_PASSWORD=changeme`: Define la clave maestra inicial.
+        
+    - `xpack.security.http.ssl.enabled=false`: Desactiva SSL para simplificar la conectividad en entorno local.
+        
+    - `ES_JAVA_OPTS=-Xms2g -Xmx2g`: Reserva **2GB de RAM** fijos para el proceso Java.
+        
+- `ulimits.memlock`: Permite que Elasticsearch bloquee su memoria para evitar que el sistema la mueva al disco (mejorando el rendimiento).
+    
+- `volumes`: Mapea `esdata` para que los logs no se borren al apagar el contenedor.
+    
+- `ports`: Expone el puerto `9200` para comunicación con la base de datos.
+    
+- `healthcheck`: Comando que verifica si el cluster está en estado "green" o "yellow" antes de permitir que otros servicios se conecten.
+    
+
+### 3.2 Servicio: Kibana
+
+La interfaz gráfica para el analista.
+
+- `depends_on`: Asegura que Kibana no intente arrancar hasta que Elasticsearch esté saludable.
+    
+- `environment`:
+    
+    - `ELASTICSEARCH_HOSTS`: Dirección interna de la base de datos.
+        
+    - `ELASTICSEARCH_USERNAME`: Usuario técnico `kibana_system`.
+        
+    - `SERVER_PUBLICBASEURL`: Define la URL de acceso local.
+        
+    - `XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY`: Llave para cifrar la base de datos de objetos de Kibana.
+        
+- `ports`: Expone el puerto `5601` para el acceso web.
+    
+
+### 3.3 Servicio: Filebeat
+
+El recolector de logs que "lee" los datasets.
+
+- `user: root`: Necesario para tener permisos de lectura sobre los archivos montados.
+    
+- `command: ["-e", "--strict.perms=false"]`: Envía logs a la consola y relaja la verificación de permisos de archivos en Windows/WSL.
+    
+- `volumes`: Monta el archivo de configuración y la carpeta de logs en modo **Solo Lectura (`:ro`)**.
+    
+
+---
+
+## 4. Desglose Técnico: filebeat.yml
+
+### 4.1 Inputs (Fuentes de Datos)
+
+Cada bloque define un origen de datos distinto:
+
+- `type: filestream`: Método moderno para leer archivos línea por línea.
+    
+- `paths`: Ubicación exacta de los logs (ej. `/datasets/aws/cloudtrail/*.log`).
+    
+- `fields`: Agrega metadatos (etiquetas) como `platform: "aws"`. Esto es vital para que el analista sepa de dónde viene el log sin abrirlo.
+    
+- `ignore_older: 0s`: Instruye a Filebeat a procesar todos los archivos, sin importar su antigüedad.
+    
+
+### 4.2 Output y Procesadores
+
+- `output.elasticsearch`: Define a dónde se envían los datos procesados (User/Pass de Elastic).
+    
+- `setup.kibana`: Configuración para que Filebeat pueda crear automáticamente sus propios dashboards en Kibana.
+    
+- `processors`: Añaden metadatos automáticos del host, Docker y la nube (Cloud) para enriquecer la investigación forense.
+    
 
-# Creación del archivo `docker-compose.yml`
+---
 
-A continuación se creó el archivo principal del stack:
+## 5. Guía de Ejecución y Mantenimiento
 
-```code
-elastic-security-lab/docker-compose.yml
-```
+1. **Levantar:** `docker-compose up -d`.
+    
+2. **Seguridad:** Resetear la contraseña de Kibana para que los servicios se hablen correctamente:
+    
+    `docker exec -it es01 bin/elasticsearch-reset-password -u kibana_system`
+    
+3. **Persistencia:** Si cambias la contraseña, actualízala en el archivo `.yml` y reinicia con `docker-compose down && docker-compose up -d`.
+    
+4. **Acceso:** `http://localhost:5601`.
+    
 
-Y se añadió la siguiente configuración:
+---
 
-## Explicación línea por línea del `docker-compose.yml`
+### Documentación Relacionada
 
-### Servicio: Elasticsearch (`es01`)
-
-```yaml
-es01:
-  image: docker.elastic.co/elasticsearch/elasticsearch:8.17.10
-```
-
-Usa la imagen oficial de Elasticsearch versión 8.17.10, dicha imagen es LTS y es la mas estable en Abril 2026 para funcionamiento con WSL, las versiones 9.x.x tienen a tener problemas de compatibilidad, se hará una actualización del laboratorio cuando salga una nueva versión LTS de Elasticsearch
-
-
-```yaml
-  container_name: es01
-```
-
-Nombre del contenedor.
-
-
-```yaml
-  restart: unless-stopped
-```
-
-El contenedor se reinicia automáticamente salvo que se detenga manualmente.
-
-
-```yaml
-  environment:
-    - node.name=es01
-```
-
-Nombre del nodo dentro del cluster.
-
-
-```yaml
-    - discovery.type=single-node
-```
-
-Modo de un solo nodo (ideal para laboratorios).
-
-
-```yaml
-    - xpack.security.enabled=true
-```
-
-Activa la seguridad (usuarios, contraseñas, roles).
-
-
-```yaml
-    - ELASTIC_PASSWORD=changeme
-```
-
-Contraseña inicial del usuario `elastic`.
-
-
-```yaml
-    - xpack.security.http.ssl.enabled=false
-    - xpack.security.transport.ssl.enabled=false
-```
-
-Desactiva SSL para simplificar el laboratorio.
-
-
-```yaml
-    - ES_JAVA_OPTS=-Xms2g -Xmx2g
-```
-
-Asigna 2GB de RAM a Elasticsearch.
-
-
-```yaml
-  ulimits:
-    memlock:
-      soft: -1
-      hard: -1
-```
-
-Evita problemas de bloqueo de memoria.
-
-
-```yaml
-  volumes:
-    - esdata:/usr/share/elasticsearch/data
-```
-
-Persistencia de datos.
-
-
-```yaml
-  ports:
-    - "9200:9200"
-```
-
-Expone Elasticsearch en localhost:9200.
-
-
-```yaml
-  networks:
-    - soc-lab-net
-```
-
-Conecta el servicio a la red interna del lab.
-
-
-```yaml
-  healthcheck:
-    test: ["CMD-SHELL", "curl -s -u elastic:changeme http://localhost:9200/_cluster/health | grep -E '\"status\":\"(yellow|green)\"'"]
-```
-
-Comprueba que Elasticsearch esté saludable antes de iniciar Kibana.
-
-### Servicio: Kibana
-
-```yaml
-kibana:
-  image: docker.elastic.co/kibana/kibana:8.17.10
-```
-
-Imagen oficial de Kibana.
-
-
-```yaml
-  depends_on:
-    es01:
-      condition: service_healthy
-```
-
-Kibana solo inicia cuando Elasticsearch está listo.
-
-
-```yaml
-  environment:
-    - ELASTICSEARCH_HOSTS=http://es01:9200
-```
-
-Conexión hacia Elasticsearch.
-
-
-```yaml
-    - ELASTICSEARCH_USERNAME=kibana_system
-    - ELASTICSEARCH_PASSWORD=dQ_WGNvbbT+agbHBXPbj
-```
-
-Credenciales del usuario interno de Kibana.
-
-
-```yaml
-    - SERVER_PUBLICBASEURL=http://localhost:5601
-```
-
-URL pública de Kibana.
-
-
-```yaml
-    - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=acadaab8c49b160a7f2fad480683a25b
-```
-
-Clave necesaria para cifrar objetos guardados.
-
-
-```yaml
-  ports:
-    - "5601:5601"
-```
-
-Expone Kibana en localhost:5601.
-
-### Servicio: Filebeat
-
-```yaml
-filebeat:
-  image: docker.elastic.co/beats/filebeat:8.17.10
-```
-
-Imagen oficial de Filebeat.
-
-
-```yaml
-  user: root
-```
-
-Permite leer archivos montados.
-
-
-```yaml
-  command: ["-e", "--strict.perms=false"]
-```
-
-Evita errores de permisos en entornos Docker.
-
-
-```yaml
-  volumes:
-    - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-    - ./datasets:/datasets:ro
-```
-
-Montaje del archivo de configuración y datasets.
-
-# Creación del archivo `filebeat.yml`
-
-Ubicado en:
-
-```code
-elastic-security-lab/filebeat/filebeat.yml
-```
-
-## Explicación línea por línea del `filebeat.yml`
-
-### Inputs por tipo de log
-
-Cada bloque:
-
-```yaml
-- type: filestream
-  enabled: true
-  id: firewall-input
-  paths:
-    - /datasets/firewall/*.log
-```
-
-Significa:
-- `type: filestream` → Filebeat leerá archivos línea por línea.
-- `paths:` → ruta dentro del contenedor.
-- `fields:` → agrega metadatos personalizados.
-- `fields_under_root: true` → los campos se agregan al nivel raíz del documento.
-- `ignore_older: 0s` → nunca ignora archivos viejos.
-
-Se repite para:
-- firewall
-- windows
-- linux
-- azure
-- aws
-
-Cada uno con sus rutas específicas.
-
-### Output hacia Elasticsearch
-
-```yaml
-output.elasticsearch:
-  hosts: ["http://es01:9200"]
-  username: "elastic"
-  password: "changeme"
-```
-
-Filebeat enviará los logs directamente a Elasticsearch.
-
-### Configuración de Kibana
-
-```yaml
-setup.kibana:
-  host: "http://kibana:5601"
-  username: "elastic"
-  password: "changeme"
-```
-
-Permite que Filebeat configure dashboards automáticamente.
-
-### Processors
-
-```yaml
-processors:
-  - add_host_metadata: ~
-  - add_cloud_metadata: ~
-  - add_docker_metadata: ~
-  - add_kubernetes_metadata: ~
-```
-
-Agregan metadatos útiles para análisis.
-
-# Levantar el laboratorio
-
-```bash
-docker-compose up -d
-```
-
-# Cambiar la contraseña del usuario `kibana_system`
-
-```bash
-docker exec -it es01 bin/elasticsearch-reset-password -u kibana_system
-```
-
-Copiar la contraseña generada y actualizarla en:
-
-```code
-docker-compose.yml
-```
-
-# Reiniciar todo
-
-```bash
-docker-compose down
-docker-compose up -d
-```
-
-# Acceder a Kibana
-
-```code
-http://localhost:5601
-```
-
-***********
-## También puedes ver
-
-[[Docker Compose]]
 [[Creación de un Data View en Kibana]]
 [[Crear un usuario en Elasticsearch desde Kibana]]
+[[Introducción al Threat Hunting]]
+[[Docker Compose]]

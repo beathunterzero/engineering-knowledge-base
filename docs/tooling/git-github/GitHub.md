@@ -1,141 +1,101 @@
-# ¿Qué es GitHub?
+## 1. ¿Qué es GitHub?
 
-GitHub es una plataforma basada en la nube que permite:
-- Alojar repositorios Git
-- Colaborar en proyectos
-- Gestionar versiones de código y documentación
-- Trabajar desde múltiples dispositivos
-- Integrar automatizaciones (CI/CD)
-- Publicar proyectos públicos o privados
+**GitHub** es una plataforma de desarrollo colaborativo basada en la nube que utiliza el sistema de control de versiones **Git**. Actúa como el nodo central donde se alojan, gestionan y sincronizan los repositorios locales, permitiendo la integración de flujos de trabajo profesionales y automatizaciones.
 
-GitHub es el estándar de la industria para Developers, DevOps, Security Specialist, Sysadmins y documentación técnica.
+### 1.1 Utilidad en el Perfil Técnico
 
-## Conceptos fundamentales
+- **Respaldo:** Almacenamiento seguro de documentación técnica y scripts de ciberseguridad.
+    
+- **Sincronización:** Acceso al Vault de Obsidian y proyectos desde múltiples estaciones de trabajo.
+    
+- **Visibilidad:** Portafolio profesional para mostrar laboratorios de **CTH** y automatizaciones.
+    
+- **Control de Versiones:** Historial detallado de la evolución de cada proyecto.
+    
 
-### Repositorio (Repo)
+## 2. Conceptos Fundamentales
 
-Es un proyecto almacenado en GitHub. Puede contener:
-- Código
-- Documentación
-- Scripts
-- Archivos Markdown
-- Configuraciones
+Para interactuar con GitHub de manera efectiva, es necesario dominar su terminología técnica:
 
-Puede ser **público** o **privado**.
+- **Repositorio (Repo):** El contenedor del proyecto. Puede ser **Público** (visible para la comunidad) o **Privado** (acceso restringido).
+    
+- **Branch (Rama):** Línea de desarrollo independiente. La rama base por defecto es `main`.
+    
+- **Commit:** Registro histórico de cambios (Snapshot) en el repositorio local.
+    
+- **Push:** Operación de subida de commits locales hacia el servidor de GitHub.
+    
+- **Pull:** Operación de descarga y fusión de cambios del servidor hacia la máquina local.
+    
+- **Pull Request (PR):** Proceso de revisión de código antes de integrar cambios en la rama principal.
+    
 
-### Branch (Rama)
+## 3. Métodos de Autenticación
 
-Una línea de trabajo independiente dentro del repositorio. La rama principal suele llamarse:
+GitHub ha deprecado el uso de contraseñas tradicionales para operaciones de Git. Los métodos vigentes son:
 
-```code
-main
-```
+|**Método**|**Descripción**|**Caso de Uso**|
+|---|---|---|
+|**SSH**|Claves criptográficas (pública/privada).|**Recomendado para uso diario en WSL.**|
+|**PAT (Token)**|Token de acceso personal (contraseña temporal).|Automatizaciones y scripts efímeros.|
+|**GitHub CLI (`gh`)**|Herramienta de línea de comandos oficial.|Gestión avanzada de repositorios desde terminal.|
 
-### Commit
+## 4. Interacción GitHub ↔ WSL (Puntos Críticos)
 
-Un “snapshot” o foto del estado del proyecto en un momento específico.
+Es fundamental entender que **WSL es un entorno Linux independiente**. Esto implica:
 
-### Push
+1. **Configuración Propia:** Debes configurar `user.name` y `user.email` dentro de la terminal de Ubuntu.
+    
+2. **Aislamiento de Credenciales:** WSL no hereda los tokens ni las sesiones de Windows o de GitHub Desktop.
+    
+3. **Autenticación Manual:** Requiere la generación de claves SSH o configuración de un _credential helper_ específico dentro de Linux.
+    
 
-Envía tus commits locales hacia GitHub.
+## 5. Operaciones Básicas de Sincronización
 
-### Pull
+### 5.1 Flujo de Subida de Cambios
 
-Trae los cambios desde GitHub hacia tu máquina.
-
-### Pull Request (PR)
-
-Propuesta de cambios para revisión antes de integrarlos a la rama principal. Muy usado en equipos.
-
-## Autenticación en GitHub
-
-GitHub ya no permite contraseñas para operaciones Git. Los métodos válidos son:
-
-### Token Personal (PAT)
-
-Funciona como contraseña temporal. Ideal para WSL, scripts o entornos donde no usas GitHub Desktop.
-
-### SSH
-
-Método más seguro y permanente. Ideal para uso diario.
-
-### GitHub CLI (gh)
-
-Permite autenticación desde terminal con comandos más avanzados.
-
-## Tipos de repositorios en GitHub
-
-### Público
-
-- Visible para todos
-- Ideal para documentación técnica, proyectos open-source o portafolios
-- Se puede clonar sin autenticación
-
-### Privado
-
-- Solo tú (y quienes invites) pueden verlo
-- Ideal para proyectos internos o sensibles
-
-## Estructura típica de un repositorio
-
-```code
-/carpeta-principal
-  ├── README.md
-  ├── .gitignore
-  ├── /src
-  ├── /docs
-  └── /scripts
-```
-
-## Interacción básica con GitHub desde Git
-
-### Subir cambios:
+Bash
 
 ```bash
+# 1. Preparar archivos
 git add .
-git commit -m "Mensaje"
-git push
+
+# 2. Registrar cambios con mensaje descriptivo
+git commit -m "feat: actualización de documentación de docker"
+
+# 3. Enviar al servidor
+git push origin main
 ```
 
-### Descargar cambios:
+### 5.2 Descarga y Clonación
 
-```bash
-git pull
-```
+- **Descargar actualizaciones:** `git pull origin main`
+    
+- **Clonar por primera vez (SSH):** `git clone git@github.com:beathunterzero/repo.git`
+    
 
-### Clonar un repositorio:
+## 6. Estructura de Repositorio Recomendada
 
-```bash
-git clone https://github.com/usuario/repositorio.git
-```
+Para mantener el profesionalismo en GitHub, se sigue la estructura ya documentada, priorizando siempre un `README.md` detallado y un `.gitignore` robusto.
 
-## GitHub + WSL (puntos clave)
+---
 
-- WSL es un entorno Linux separado
-- Necesita su propia configuración de Git
-- Necesita su propio token o claves SSH
-- No comparte credenciales con Windows
-- No usa GitHub Desktop
+### Referencias Externas
 
-Por eso es importante documentar:
-- Cómo generar un token
-- Cómo guardarlo
-- Cómo usar SSH
-- Cómo configurar Git dentro de WSL
+- [GitHub Documentation: Getting Started](https://docs.github.com/en/get-started)
+    
+- [GitHub Skills: Interactive Courses](https://skills.github.com/)
+    
+- [Git and GitHub: A Beginner's Guide](https://www.freecodecamp.org/news/git-and-github-for-beginners/)
+    
 
-## ¿Para qué uso GitHub en mi día a día?
+### Documentación Relacionada
 
-- Respaldar documentación técnica
-- Acceder a mi documentación desde cualquier PC
-- Mantener historial de cambios
-- Sincronizar mi vault de Obsidian
-- Tener un repositorio público como referencia profesional
-- Practicar buenas prácticas de control de versiones
-****
-## Puedes ver también:
-[[Visibilidad de repositorios]]
-[[Estructura de un repositorio]]
-[[Token Personal (PAT)]]
+[[Git]]
 [[Autenticación SSH con GitHub]]
+[[Buenas prácticas y manejos avanzado]]
+[[Estructura de un repositorio]]
 [[Mover repositorios Git y GitHub de manera local]]
-
+[[Token Personal (PAT)]]
+[[Visibilidad de repositorios]]

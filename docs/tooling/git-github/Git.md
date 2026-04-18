@@ -1,105 +1,112 @@
-# ¿Qué es Git?
+## 1. ¿Qué es Git?
 
-Git es un sistema de control de versiones distribuido que permite:
-- Llevar historial de cambios
-- Trabajar en múltiples máquinas
-- Sincronizar proyectos
-- Recuperar versiones anteriores
-- Colaborar con otros
+**Git** es un sistema de control de versiones distribuido diseñado para gestionar el historial de cambios en archivos de texto, código fuente y documentación técnica. A diferencia de los sistemas centralizados, cada copia local de Git es un repositorio completo con historial y capacidad de seguimiento total.
 
-Es una herramienta esencial para Developers, DevOps, Security Specialist, Sysadmins y documentación técnica.
+### 1.1 Capacidades Principales
 
-## Instalación de Git
+- **Trazabilidad:** Mantiene un registro exacto de quién, cuándo y por qué se realizó un cambio.
+    
+- **Sincronización:** Facilita el trabajo en múltiples máquinas y entornos (WSL, Windows, Servidores).
+    
+- **Seguridad:** Permite revertir cambios y recuperar versiones anteriores ante errores o incidentes.
+    
+- **Colaboración:** Es el estándar para equipos de Ciberseguridad, DevOps e Ingeniería.
+    
 
-### Windows
+## 2. Instalación en Diversos Sistemas Operativos
 
-Descargar desde: https://git-scm.com/downloads
-Durante la instalación:
-- Mantener opciones por defecto
-- Elegir VS Code como editor (opcional pero recomendado)
-- Aceptar integración con PowerShell
+### 2.1 Microsoft Windows
 
-Verificar instalación:
+1. **Descarga:** [git-scm.com/downloads](https://git-scm.com/downloads).
+    
+2. **Configuración Recomendada:**
+    
+    - Seleccionar **Visual Studio Code** como editor por defecto.
+        
+    - Habilitar la integración con **PowerShell** y **Git Bash**.
+        
+    - Mantener el nombre de la rama principal como `main`.
+        
 
-```powershell
-git --version
-```
+### 2.2 Distribuciones basadas en Debian (Ubuntu / Kali Linux)
 
-### **Debian / Ubuntu / Kali**
+Aunque muchas de estas distros ya incluyen Git (especialmente Kali), el procedimiento de instalación es el siguiente:
 
-Estas distribuciones usan `apt` como gestor de paquetes, por lo que el proceso es idéntico.
-#### Actualizar repositorios
+Bash
 
 ```bash
+# Actualizar los índices de los repositorios
 sudo apt update
-```
 
-#### Instalar Git
-
-```bash
+# Instalar el paquete git
 sudo apt install git -y
-```
 
-#### Verificar instalación
-
-```bash
+# Verificar versión e instalación
 git --version
 ```
 
-#### Ubicación típica del binario
+- **Ruta del binario:** `/usr/bin/git`.
+    
 
-```code
-/usr/bin/git
-```
+### 2.3 Fedora (Gestor de paquetes DNF)
 
-#### Notas importantes
-
-- Kali Linux ya suele traer Git preinstalado
-- En Ubuntu Server puede no venir por defecto
-- En Debian minimal tampoco viene instalado
-### **Fedora**
-
-Fedora usa `dnf` como gestor de paquetes.
-#### Actualizar repositorios
+Bash
 
 ```bash
+# Verificar actualizaciones
 sudo dnf check-update
-```
 
-#### Instalar Git
-
-```bash
+# Instalar git
 sudo dnf install git -y
-```
 
-#### Verificar instalación
-
-```bash
+# Verificar versión
 git --version
 ```
 
-#### Ubicación típica del binario
+## 3. Configuración Inicial (Post-Instalación)
 
-```code
-/usr/bin/git
-```
+Una vez instalado el binario, es obligatorio configurar la identidad global. Esta información se adjuntará a cada commit que realices para asegurar la autoría.
 
-## **Configuración inicial después de instalar Git**
-
-Independientemente del sistema operativo:
+Bash
 
 ```bash
+# Configurar nombre de usuario/alias
 git config --global user.name "beathunterzero"
+
+# Configurar correo electrónico (debe coincidir con el de GitHub para vinculación)
 git config --global user.email "rhodyn.ildefonso.1311@outlook.com"
 ```
 
-Verificar:
+### 3.1 Verificación de Configuración
+
+Para auditar los valores establecidos y asegurar que no existan duplicados o errores de escritura:
+
+Bash
 
 ```bash
 git config --global --list
 ```
 
-*****
-## Puedes ver también:
+## 4. Notas de Implementación
+
+- **Kali Linux:** Generalmente viene preinstalado debido a su enfoque en herramientas de auditoría que dependen de Git para clonar repositorios de exploits.
+    
+- **WSL:** Se recomienda instalar Git directamente dentro de la distribución de Linux (Ubuntu) para evitar conflictos de permisos con el binario de Windows.
+    
+
+---
+
+### Referencias Externas
+
+- [Git Documentation: Getting Started - Installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+    
+- [GitHub: First-time Git setup guide](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git)
+    
+- [Linuxize: How to install Git on Ubuntu](https://linuxize.com/post/how-to-install-git-on-ubuntu-20-04/)
+    
+
+### Documentación Relacionada
+
 [[GitHub]]
-[[Mover repositorios Git y GitHub de manera local]]
+[[Buenas prácticas y manejos avanzado]]
+[[Estructura de un repositorio]]

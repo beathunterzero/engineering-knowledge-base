@@ -1,306 +1,102 @@
-# ¿Qué es Docker Compose?
+## 1. Definición y Propósito
 
-Docker Compose es una herramienta que permite:
-- Definir múltiples contenedores en un solo archivo.
-- Configurar redes, volúmenes, variables y dependencias.
-- Levantar toda una aplicación con un solo comando.
-- Gestionar el ciclo de vida de los servicios.
+**Docker Compose** es una herramienta diseñada para definir y gestionar aplicaciones multi-contenedor. Permite orquestar de manera declarativa servicios, redes y volúmenes en un único archivo de configuración, facilitando la replicación de entornos completos con un solo comando.
 
-### Idea clave
+- **Función Principal:** Orquestador local para describir la interacción entre múltiples servicios.
+    
+- **Archivo de Configuración:** Utiliza el formato **YAML** (`docker-compose.yml`), el cual destaca por ser legible y estructurado mediante indentación.
+    
 
-Compose es como un **orquestador local**: describe cómo deben funcionar varios contenedores juntos.
+## 2. Estructura del Archivo YAML
 
-# ¿Qué es un archivo YAML?
+Un archivo `docker-compose.yml` se organiza en secciones clave que definen el estado deseado de la aplicación:
 
-Docker Compose usa archivos **YAML** (`docker-compose.yml`).
-
-### YAML significa:
-
-**Y**AML **A**in't **M**arkup **L**anguage.
-
-### Características:
-
-- Es un formato **legible por humanos**.
-- Usa indentación para definir estructura.
-- No usa llaves ni corchetes.
-- Es ideal para configuraciones declarativas.
-
-### Ejemplo simple:
-
-```yaml
-version: "3.9"
-services:
-  web:
-    image: nginx
-    ports:
-      - "8080:80"
-```
-
-# Estructura de un archivo docker-compose.yml
-
-### Componentes principales:
-
-### version
-
-Define la versión del esquema de Compose.
-### services
-
-Lista de contenedores que formarán la aplicación.
-### image
-
-Imagen a usar.
-### build
-
-Construye una imagen desde un Dockerfile.
-### ports
-
-Mapeo de puertos host → contenedor.
-### volumes
-
-Persistencia de datos.
-### environment
-
-Variables de entorno.
-### depends_on
-
-Define dependencias entre servicios.
-### Ejemplo completo:
-
-```yaml
-version: "3.9"
-
-services:
-  db:
-    image: mysql:8
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-    volumes:
-      - dbdata:/var/lib/mysql
-
-  web:
-    build: ./app
-    ports:
-      - "8080:80"
-    depends_on:
-      - db
-
-volumes:
-  dbdata:
-```
-
-# Iniciar servicios con Docker Compose
-
-Para levantar todos los servicios definidos:
-
-```bash
-docker compose up
-```
-
-### Opciones útiles:
-
-#### Modo detach (en segundo plano)
-
-```bash
-docker compose up -d
-```
-
-#### Reconstruir imágenes
-
-```bash
-docker compose up --build
-```
-
-# Detener servicios
-
-Detiene los contenedores sin eliminarlos:
-
-```bash
-docker compose stop
-```
-
-# Reiniciar servicios
-
-Reinicia todos los servicios:
-
-```bash
-docker compose restart
-```
-
-Reiniciar un servicio específico:
-
-```bash
-docker compose restart web
-```
-
-# Eliminar contenedores, redes y volúmenes
-
-### Eliminar contenedores creados por Compose:
-
-```bash
-docker compose down
-```
-
-### Eliminar contenedores + redes + volúmenes:
-
-```bash
-docker compose down -v
-```
-
-### Eliminar imágenes asociadas:
-
-```bash
-docker compose down --rmi all
-```
-
-# Política de reinicio (`restart`)
-
-Permite definir cómo se comporta un servicio cuando falla o se detiene.
-### Valores disponibles:
-
-|Política|Descripción|
+|**Directiva**|**Descripción**|
 |---|---|
-|`no`|No reinicia (por defecto)|
-|`always`|Siempre reinicia|
-|`on-failure`|Reinicia solo si el proceso falla|
-|`unless-stopped`|Reinicia excepto si lo detienes manualmente|
+|**version**|Versión del formato de Compose (ej. "3.9").|
+|**services**|Bloque donde se definen los contenedores (servicios).|
+|**image / build**|Define si se usa una imagen existente o se construye desde un `Dockerfile`.|
+|**ports**|Mapeo de puertos entre el host y el contenedor (`HOST:CONTAINER`).|
+|**volumes**|Configuración de persistencia de datos y montajes.|
+|**depends_on**|Establece el orden de inicio (ej. la web espera a la base de datos).|
+|**restart**|Define la política de reinicio ante fallos o detenciones.|
 
-### Ejemplo:
+## 3. Gestión del Ciclo de Vida (CLI)
 
-```yaml
-services:
-  web:
-    image: nginx
-    restart: always
-```
+Comandos esenciales para administrar el stack definido en el archivo Compose:
 
-# Leer logs de servicios
+### 3.1 Despliegue y Control
 
-### Logs de todos los servicios:
+- **Levantar Entorno:** Crea y arranca todos los servicios.
+    
+    - `docker compose up` (Usa `-d` para segundo plano/detach).
+        
+    - `docker compose up --build` (Fuerza la reconstrucción de imágenes).
+        
+- **Estado de Servicios:** Lista los contenedores asociados al proyecto y su estado.
+    
+    - `docker compose ps`
+        
+- **Reiniciar:**
+    
+    - `docker compose restart [servicio]`
+        
 
-```bash
-docker compose logs
-```
+### 3.2 Detención y Limpieza
 
-### Logs en tiempo real:
+- **Parar Servicios:** Detiene los contenedores pero mantiene los recursos.
+    
+    - `docker compose stop`
+        
+- **Eliminación Total:** Detiene y elimina contenedores y redes creadas.
+    
+    - `docker compose down`
+        
+    - `docker compose down -v` (Elimina también los **volúmenes** persistentes).
+        
+    - `docker compose down --rmi all` (Elimina también las **imágenes** asociadas).
+        
 
-```bash
-docker compose logs -f
-```
+## 4. Diagnóstico e Interacción
 
-### Logs de un servicio específico:
+- **Monitoreo de Logs:**
+    
+    - `docker compose logs -f [servicio]` (Seguimiento en tiempo real).
+        
+- **Ejecución de Comandos:** Acceso directo a un servicio específico sin necesidad de usar el ID del contenedor.
+    
+    - `docker compose exec [servicio] bash`
+        
 
-```bash
-docker compose logs -f web
-```
+## 5. Networking y Persistencia
 
-# Ejecutar comandos dentro de servicios
+- **Red Automática:** Compose crea una red interna por defecto. Los servicios pueden comunicarse entre sí utilizando su **nombre de servicio** como hostname (ej. `http://db:3306`).
+    
+- **Volúmenes Nombrados:** Permiten que los datos sobrevivan a la eliminación del contenedor, declarándose en la raíz del archivo y asignándose dentro de cada servicio.
+    
 
-Similar a `docker exec`, pero usando el nombre del servicio:
+## 6. Políticas de Reinicio (Restart)
 
-```bash
-docker compose exec web bash
-```
+|**Política**|**Descripción**|
+|---|---|
+|`no`|No reinicia automáticamente (por defecto).|
+|`always`|Reinicia siempre que el contenedor se detenga.|
+|`on-failure`|Reinicia solo si el contenedor falla (exit code distinto de 0).|
+|`unless-stopped`|Reinicia siempre, excepto si el usuario lo detuvo manualmente.|
 
-Si el contenedor no tiene bash:
+---
 
-```bash
-docker compose exec web sh
-```
+### Referencias Externas
 
-# Ver el estado de los servicios
+- [Docker Compose Specification](https://docs.docker.com/compose/compose-file/)
+    
+- [Overview of Docker Compose CLI](https://docs.docker.com/compose/reference/)
+    
+- [YAML Ain't Markup Language (Official Site)](https://yaml.org/)
+    
 
-```bash
-docker compose ps
-```
+### Documentación Relacionada
 
-# Construir imágenes definidas en Compose
-
-```bash
-docker compose build
-```
-
-Reconstruir sin usar caché:
-
-```bash
-docker compose build --no-cache
-```
-
-# Redes en Docker Compose
-
-Compose crea automáticamente una red para que los servicios se comuniquen por nombre.
-
-Ejemplo:
-- El servicio `web` puede conectarse a `db` usando `db:3306`.
-
-Puedes definir redes personalizadas:
-
-```yaml
-networks:
-  redinterna:
-    driver: bridge
-```
-
-# Volúmenes en Docker Compose
-
-Permiten persistir datos.
-
-```yaml
-volumes:
-  dbdata:
-```
-
-Asignación en un servicio:
-
-```yaml
-services:
-  db:
-    volumes:
-      - dbdata:/var/lib/mysql
-```
-
-# Variables de entorno en Compose
-
-### Definidas en el YAML:
-
-```yaml
-environment:
-  APP_ENV: production
-```
-
-### Usando archivo `.env`:
-
-```code
-APP_ENV=production
-```
-
-Y en el YAML:
-
-```yaml
-environment:
-  - APP_ENV=${APP_ENV}
-```
-
-# Limpieza de recursos creados por Compose
-
-Eliminar contenedores detenidos:
-
-```bash
-docker compose down
-```
-
-Eliminar volúmenes:
-
-```bash
-docker compose down -v
-```
-
-Eliminar imágenes:
-
-```bash
-docker compose down --rmi all
-```
-
-******
-## También puedes ver:
+[[Conceptos fundamentales de Docker]]
 [[Buenas prácticas en Docker]]
 [[GitHub]]

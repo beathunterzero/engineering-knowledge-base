@@ -1,136 +1,97 @@
-Un **Data View** en Kibana permite visualizar y consultar los datos que Filebeat envía a Elasticsearch. Sin este paso, no podrás usar **Discover**, **Dashboards**, **Lens** ni realizar análisis de Threat Hunting.
+## 1. Introducción al Data View
 
-En este documento aprenderás a crear un Data View usando el patrón:
+Un **Data View** (anteriormente conocido como _Index Pattern_) es el puente que permite a Kibana interpretar y visualizar los datos almacenados en Elasticsearch. Sin este paso, las herramientas de análisis como **Discover**, **Dashboards** o **Lens** no pueden realizar consultas de Threat Hunting.
 
-```code
-filebeat-*
-```
+---
 
-# Acceder a Kibana
+## 2. Configuración Paso a Paso
 
-Con el laboratorio levantado:
+### 2.1 Acceso Inicial
 
-```code
-http://localhost:5601
-```
+Con el laboratorio de Docker levantado, accede a la interfaz gráfica:
 
-Inicia sesión con tu usuario (por ejemplo, `hunter`).
+- **URL:** `http://localhost:5601`
+    
+- **Credenciales:** Usa tu usuario de analista (ej. `elastic` o `hunter`).
+    
 
-# Ir a la sección de Data Views
+### 2.2 Navegación en el Stack Management
 
-En el menú lateral izquierdo:
+Para registrar la fuente de datos, sigue esta ruta en el menú lateral:
 
-1. Entra a **Stack Management**
-2. Ve hasta **Kibana**
-3. Selecciona **Data Views**
-4. Haz clic en:
+1. Entra a **Stack Management** (sección de administración).
+    
+2. Bajo el bloque de **Kibana**, selecciona **Data Views**.
+    
+3. Haz clic en el botón azul: **Create data view**.
+    
 
-```code
-Create data view
-```
+### 2.3 Definición del Patrón de Índice
 
-# Configurar el Data View
+En el formulario de configuración, completa los campos clave con la siguiente lógica:
 
-En el formulario, completa lo siguiente:
-### Name
+- **Name:** `elastic-security-lab`
+    
+    - _Explicación:_ Es el nombre amigable que verás en la interfaz.
+        
+- **Index pattern:** `filebeat-*`
+    
+    - _Explicación:_ El uso del comodín (`*`) es crítico. Indica a Kibana que debe agrupar todos los índices generados por Filebeat, permitiendo analizar de forma centralizada logs de:
+        
+        - `filebeat-firewall`
+            
+        - `filebeat-windows`
+            
+        - `filebeat-linux`
+            
+        - `filebeat-azure`
+            
+        - `filebeat-aws`
+            
+- **Timestamp field:** `@timestamp`
+    
+    - _Explicación:_ Selecciona el campo estándar que Filebeat utiliza para marcar la fecha y hora exacta de cada evento. Es el eje temporal para todas las gráficas y líneas de tiempo.
+        
 
-```code
-elastic-security-lab
-```
+---
 
-### Index pattern
+## 3. Verificación de Ingesta
 
-```code
-filebeat-*
-```
+Una vez creado el Data View, el siguiente paso es validar que los logs están fluyendo correctamente hacia el SIEM.
 
-Esto le indica a Kibana que debe incluir todos los índices generados por Filebeat, sin importar la plataforma:
-- filebeat-firewall
-- filebeat-windows
-- filebeat-linux
-- filebeat-azure
-- filebeat-aws
+1. Ve a la sección **Discover** en el menú principal.
+    
+2. Asegúrate de seleccionar el Data View `elastic-security-lab` en el selector superior.
+    
+3. Si la configuración es correcta, verás el histograma de eventos y la lista de logs en tiempo real.
+    
 
-Todos quedarán agrupados bajo este patrón.
+### 3.1 Filtros Rápidos de Auditoría
 
-# Seleccionar el campo de tiempo
+Puedes usar la barra de búsqueda para segmentar la vista por plataforma:
 
-En **Timestamp field**, selecciona:
+- `log_type : "windows"`
+    
+- `log_type : "firewall"`
+    
+- `log_type : "aws"`
+    
 
-```code
-@timestamp
-```
+---
 
-Este es el campo estándar que Filebeat usa para marcar la fecha y hora de cada evento.
+## 4. Resolución de Problemas (Troubleshooting)
 
-<img width="717" height="401" alt="image" src="https://github.com/user-attachments/assets/1c041f73-d207-4d77-8ef2-c1ebf63db0ed" />
+Si al entrar a **Discover** no aparecen datos ("No results match your search"), realiza el siguiente checklist técnico:
 
+|**Componente**|**Acción de Verificación**|**Comando / URL**|
+|---|---|---|
+|**Contenedores**|Verificar que Filebeat y ES están activos.|`docker ps`|
+|**Datasets**|Confirmar que hay archivos `.log` en las rutas.|`ls -l datasets/`|
+|**Salud del Cluster**|Validar que Elasticsearch no esté bloqueado.|`http://localhost:9200/_cluster/health`|
+|**Permisos**|Revisar que el usuario tenga roles de lectura.|Check en **Stack Management > Users**|
 
-# Crear el Data View
+---
 
-Haz clic en:
+### Documentación Relacionada
 
-```code
-Create data view
-```
-
-Kibana confirmará que el Data View fue creado correctamente.
-
-# Verificar que los datos están llegando
-
-Ahora ve a:
-
-```code
-Discover
-```
-
-Si todo está funcionando:
-- verás eventos en tiempo real
-- podrás filtrar por `log_type`
-- podrás analizar logs de firewall, Windows, Linux, AWS y Azure
-
-Ejemplos de filtros útiles:
-
-```code
-log_type : "windows"
-log_type : "firewall"
-log_type : "aws"
-```
-<img width="1907" height="945" alt="image" src="https://github.com/user-attachments/assets/9583ade0-9dd8-4aeb-943d-1a6b68dd94f8" />
-
-
-# ¿Qué pasa si no aparece ningún dato?
-
-Revisa:
-### Filebeat está corriendo
-
-```code
-docker ps
-```
-
-### Filebeat está leyendo los datasets
-
-Los logs deben estar en:
-
-```code
-datasets/<plataforma>/
-```
-
-### Elasticsearch está saludable
-
-```code
-http://localhost:9200/_cluster/health
-```
-
-### El usuario tiene permisos
-
-Debe tener al menos:
-- viewer
-- kibana_admin
-- monitoring_user
-
-*****
-## Puedes ver también:
 [[Crear un usuario en Elasticsearch desde Kibana]]
-[[Creación de elastic-security-lab]]
-[[Docker Compose]]

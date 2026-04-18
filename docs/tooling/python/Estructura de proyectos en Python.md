@@ -1,55 +1,79 @@
-## Estructura recomendada
+## 1. Arquitectura de Proyecto Estandarizada
 
-```code
+Mantener una estructura consistente en Python no solo facilita la organización personal, sino que asegura la compatibilidad con herramientas de empaquetado y facilita la integración en flujos de **CI/CD**. El siguiente esquema representa el estándar profesional para herramientas de automatización y scripts de seguridad.
+
+### 1.1 Esquema de Directorios Recomendado
+
+Plaintext
+
+```plaintext
 mi_proyecto/
 │
-├── .venv/               # Entorno virtual (ignorado)
-├── src/                 # Código fuente
-│   └── main.py
-├── docs/                # Documentación
-├── requirements.txt
-├── .gitignore
-└── README.md
+├── .venv/               # Entorno virtual local (SIEMPRE ignorado en Git)
+├── src/                 # Código fuente del proyecto
+│   ├── __init__.py      # Convierte la carpeta en un paquete
+│   └── main.py          # Punto de entrada principal
+├── docs/                # Documentación técnica y diagramas
+├── tests/               # Scripts de prueba y validación (opcional)
+├── requirements.txt     # Listado de dependencias del proyecto
+├── .gitignore           # Definición de archivos excluidos
+└── README.md            # Manual de uso y configuración
 ```
 
-## Carpetas estándar
+## 2. Definición de Componentes Críticos
 
-### `src/`
+### 2.1 El Directorio `src/` (Source)
 
-- Contiene todo el código fuente.
-- Evita colocar scripts sueltos en la raíz.
+Es el contenedor de la lógica de negocio. Separar el código en este directorio evita que archivos de configuración (como el `.gitignore`) se mezclen con los módulos importables.
 
-### `docs/`
+- **Nota para Scripts Directos:** Para scripts de una sola tarea o de uso rápido, se puede omitir `src/` para simplificar la ejecución, pero en proyectos escalables es mandatorio.
+    
 
-- Documentación técnica o notas del proyecto.
+### 2.2 Entorno Virtual (`.venv/`)
 
-### `.venv/`
+Contiene el intérprete de Python y las librerías instaladas específicamente para este proyecto.
 
-- Entorno virtual local.
-- Siempre ignorado.
+- **Regla de Oro:** Debe existir en la raíz pero **nunca** debe ser rastreado por Git .
+    
 
-## Dónde colocar archivos clave
+### 2.3 Archivos de Configuración Raíz
 
-### `requirements.txt`
+- **requirements.txt:** Archivo esencial que lista las librerías externas. Permite replicar el entorno con: `pip install -r requirements.txt`.
+    
+- **.gitignore:** Debe incluir `/ .venv /`, `__pycache__ /` y archivos de variables de entorno `.env`.
+    
 
-En la raíz del proyecto.
+## 3. Jerarquía de Módulos
 
-### `.gitignore`
+Para asegurar que Python reconozca tus carpetas como módulos importables, es buena práctica incluir un archivo vacío llamado `__init__.py` dentro de `src/`.
 
-También en la raíz.
+Python
 
-### Módulos Python
+```python
+# Ejemplo de importación interna
+from src.utils import limpiador_de_logs
+```
 
-Dentro de `src/`, nunca en la raíz.
+## 4. Mejores Prácticas de Organización
 
-## Buenas prácticas de organización
+- **Principio de Aislamiento:** Un proyecto = un entorno virtual. Nunca instales librerías de forma global para evitar conflictos de versiones.
+    
+- **Punto de Entrada Único:** Mantener `main.py` como el orquestador principal que invoca funciones de otros módulos.
+    
+- **Separación de Entornos:** No mezclar código de pruebas (`tests/`) con código funcional de producción (`src/`).
+    
+- **Documentación Activa:** El `README.md` debe explicar no solo qué hace el script, sino los comandos exactos para levantar el entorno virtual e instalar las dependencias.
+    
 
-- Un proyecto = un entorno virtual.
-- No mezclar código de pruebas con código de producción.
-- Mantener `main.py` como punto de entrada.
-- Usar nombres descriptivos para módulos.
-- Documentar dependencias y comandos en `README.md`.
-- Cuando se trata de scripts directos, evitar usar `src/` para limpieza en ejecución del script.
-*****
-## También puedes ver:
+---
+
+### Referencias Externas
+
+- [Python Packaging User Guide: Project Structure](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
+    
+- [The Hitchhiker's Guide to Python: Structuring Your Project](https://docs.python-guide.org/writing/structure/)
+    
+
+### Documentación Relacionada
+
 [[Gestión de dependencias en Python]]

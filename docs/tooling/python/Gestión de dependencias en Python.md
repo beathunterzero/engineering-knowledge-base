@@ -1,110 +1,91 @@
-## Instalar dependencias
+## 1. El Rol de PIP y los Entornos Virtuales
+
+**PIP** (_Package Installer for Python_) es el gestor de paquetes estándar. Su función es descargar e instalar librerías externas. Para evitar conflictos entre proyectos (ej. un script que requiere `requests v2.0` y otro `v2.31`), se utilizan los **Entornos Virtuales (.venv)**.
+
+## 2. Flujo Operativo Correcto
+
+El error más común es intentar gestionar la carpeta `.venv` manualmente. Esta carpeta es de uso exclusivo del intérprete de Python; el analista interactúa con ella a través de la **activación**.
+
+### 2.1 Activación y Contexto
+
+No se debe entrar a la carpeta `.venv`. El comando se ejecuta desde la **raíz del proyecto**:
+
+Bash
 
 ```bash
-pip install nombre_paquete
-```
+# 1. Navegar al proyecto
+cd ~/mi_proyecto
 
-### Dónde ejecutar `pip install nombre_paquete`
-
-#### No se ejecuta dentro de la carpeta `.venv/`
-
-Jamás entras a `.venv/` manualmente. Esa carpeta es interna, Python la gestiona solo.
-
-#### Se ejecuta en la raíz del proyecto
-
-Ejemplo:
-
-```code
-mi_proyecto/
-│
-├── .venv/
-├── src/
-├── requirements.txt
-└── README.md
-```
-
-Estando en `mi_proyecto/`, ejecutas:
-
-```bash
-pip install nombre_paquete
-```
-
-#### Pero SOLO después de activar el entorno virtual
-
-```bash
+# 2. Activar el entorno (En WSL/Linux)
 source .venv/bin/activate
+
+# 3. Validar activación (El prompt cambia)
+# (.venv) rhodyn@beathunterzero:~/mi_proyecto$
 ```
 
-Cuando ves esto en tu prompt:
+Una vez activado, los comandos `python` y `pip` apuntan automáticamente a los binarios dentro de `.venv`, aislando cualquier instalación del sistema global.
+
+## 3. Gestión de Requerimientos (`requirements.txt`)
+
+Este archivo es el manifiesto de dependencias del proyecto. Permite que cualquier otro analista (o tú mismo en otra máquina) replique el entorno exacto.
+
+- **Exportar estado actual:** Registra todas las librerías instaladas y sus versiones.
+    
+    `pip freeze > requirements.txt`
+    
+- **Instalación masiva:** Reconstruye el entorno basado en el manifiesto.
+    
+    `pip install -r requirements.txt`
+    
+- **Actualización:** Tras actualizar un paquete, es mandatorio regenerar el archivo.
+    
+    `pip install --upgrade nombre_paquete && pip freeze > requirements.txt`
+    
+
+## 4. Versionado Semántico
+
+Las versiones en Python siguen el formato **MAJOR.MINOR.PATCH** (ej. `2.31.0`):
+
+1. **MAJOR (2):** Cambios que rompen la compatibilidad (requiere revisión de código).
+    
+2. **MINOR (31):** Nuevas funcionalidades (retrocompatible).
+    
+3. **PATCH (0):** Correcciones de errores y seguridad.
+    
+
+> **Regla de Seguridad:** Evitar versiones flotantes (ej. `requests>=2.0`). Es preferible "congelar" la versión exacta (`requests==2.31.0`) para evitar que una actualización automática rompa un script de CTH crítico.
+
+## 5. Recuperación: Regenerar Entorno desde Cero
+
+Si el entorno virtual se corrompe o presenta comportamientos erráticos, la solución más eficiente es eliminarlo y reconstruirlo:
+
+Bash
 
 ```bash
-(.venv) rhodyn@beathunterzero:~/mi_proyecto$
+rm -rf .venv                      # Eliminar carpeta corrupta
+python3.12 -m venv .venv          # Crear nuevo entorno limpio
+source .venv/bin/activate         # Activar
+pip install -r requirements.txt   # Reinstalar dependencias exactas
 ```
 
-significa que **pip está apuntando al pip dentro de .venv**, no al del sistema.
+## 6. Buenas Prácticas
 
-#### ¿Por qué funciona así?
+- **Aislamiento Total:** Nunca uses `sudo pip install`. Las instalaciones globales ensucian el sistema operativo.
+    
+- **Higiene de Manifiesto:** Mantén solo las dependencias estrictamente necesarias para reducir la superficie de ataque y el peso del proyecto.
+    
+- **Documentación:** Asegúrate de que el `README.md` indique la versión de Python recomendada para el entorno.
+    
 
-Porque cuando activas el entorno virtual:
-- `python` apunta a `.venv/bin/python`
-- `pip` apunta a `.venv/bin/pip`
-- Las dependencias se instalan dentro de `.venv/lib/...`
+---
 
-No importa desde qué carpeta ejecutes `pip install`, **mientras el entorno esté activado**, pip instalará dentro de `.venv`.
+### Referencias Externas
 
-Pero por convención y orden, siempre lo haces desde la raíz del proyecto.
+- [Python.org: Installing Packages using pip and venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
+    
+- [Semantic Versioning 2.0.0 Standard](https://semver.org/)
+    
 
-#### Flujo correcto (siempre)
+### Documentación Relacionada
 
-```bash
-cd mi_proyecto
-source .venv/bin/activate
-pip install requests
-pip freeze > requirements.txt
-```
-
-## Exportar dependencias
-
-```bash
-pip freeze > requirements.txt
-```
-
-## Instalar dependencias desde requirements
-
-```bash
-pip install -r requirements.txt
-```
-
-## Actualizar dependencias
-
-```bash
-pip install --upgrade nombre_paquete
-pip freeze > requirements.txt
-```
-
-## Versionado semántico
-
-Ejemplo: `requests==2.31.0`
-- **Mayor**: cambios incompatibles
-- **Menor**: nuevas funciones
-- **Patch**: correcciones
-
-## Regenerar un entorno desde cero
-
-```bash
-rm -rf .venv
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-## Buenas prácticas
-
-- Nunca instalar paquetes globalmente.
-- Siempre actualizar requirements después de instalar algo nuevo.
-- Mantener dependencias mínimas.
-- Evitar versiones flotantes (`requests>=2.0`).
-
-*****
-## También puedes ver:
-[[Buenas prácticas en Python]]
+[[Automatización y scripting en Python]]

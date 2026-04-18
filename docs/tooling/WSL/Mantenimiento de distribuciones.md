@@ -1,231 +1,98 @@
-# Introducción
-
-Cada distribución Linux dentro de WSL tiene su propio gestor de paquetes:
-
-| Distro          | Gestor     | Comando base  |
-| --------------- | ---------- | ------------- |
-| Ubuntu / Debian | **APT**    | `sudo apt`    |
-| Fedora          | **DNF**    | `sudo dnf`    |
-| openSUSE        | **Zypper** | `sudo zypper` |
-
-El mantenimiento básico consiste en:
-- Actualizar listas de paquetes
-- Instalar actualizaciones
-- Limpiar paquetes innecesarios
-- Liberar espacio
-
-## Mantenimiento en Ubuntu / Debian / Kali (APT)
-
-APT es el gestor más común en WSL.
-
-### Actualizar lista de paquetes
-
-```bash
-sudo apt update
-```
-
-Esto **no actualiza nada**, solo refresca la lista de versiones disponibles.
-
-### Actualizar paquetes instalados
-
-```bash
-sudo apt upgrade -y
-```
-
-Actualiza paquetes sin eliminar ni reemplazar dependencias.
-
-### Actualización completa del sistema
-
-```bash
-sudo apt full-upgrade -y
-```
-
-Permite:
-- Reemplazar paquetes
-- Eliminar dependencias obsoletas
-- Instalar nuevas dependencias necesarias
-
-Es la forma recomendada para mantener el sistema al día.
-
-### Eliminar paquetes innecesarios
-
-```bash
-sudo apt autoremove -y
-```
-
-Elimina dependencias que ya no se usan.
-
-### Limpiar caché de paquetes
-
-```bash
-sudo apt clean
-sudo apt auto-clean
-```
-
-- `clean` → borra **toda** la caché
-- `auto-clean` → borra solo paquetes obsoletos
-
-### Instalar herramientas de desarrollo
-
-```bash
-sudo apt install build-essential git curl wget -y
-```
-
-#### ¿Qué instala?
-
-- `gcc`, `g++`, `make`
-- librerías de desarrollo
-- `git`, `curl`, `wget`
-
-Es el equivalente al “kit básico de desarrollo”.
-
-## Mantenimiento en Fedora (DNF)
-
-Fedora usa **DNF**, un gestor moderno y muy eficiente.
-
-### Actualizar lista de paquetes
-
-```bash
-sudo dnf check-update
-```
-
-Equivalente a `apt update`.
-
-### Actualizar paquetes
-
-```bash
-sudo dnf upgrade --refresh -y
-```
-
-`--refresh` fuerza a DNF a obtener metadatos nuevos.
-
-### Eliminar paquetes innecesarios
-
-```bash
-sudo dnf autoremove -y
-```
-
-### Limpiar caché
-
-```bash
-sudo dnf clean all
-```
-
-### Instalar herramientas de desarrollo
-
-```bash
-sudo dnf groupinstall "Development Tools" -y
-sudo dnf install git curl wget -y
-```
-
-#### ¿Qué instala?
-
-- `gcc`, `g++`, `make`
-- herramientas de compilación
-- utilidades de red
-
-El _groupinstall_ es el equivalente a `build-essential`.
-
-## Mantenimiento en openSUSE (Zypper)
-
-openSUSE usa **Zypper**, uno de los gestores más potentes.
-
-### Actualizar lista de paquetes
-
-```bash
-sudo zypper refresh
-```
-
-###  Actualizar paquetes
-
-```bash
-sudo zypper update -y
-```
-
-### Actualización completa del sistema
-
-```bash
-sudo zypper dist-upgrade -y
-```
-
-Equivalente a `apt full-upgrade`.
-
-### Eliminar paquetes innecesarios
-
-```bash
-sudo zypper remove --clean-deps paquete
-```
-
-### Para limpieza automática:
-
-```bash
-sudo zypper packages --unneeded
-```
-
-### Limpiar caché
-
-```bash
-sudo zypper clean --all
-```
-
-### Instalar herramientas de desarrollo
-
-```bash
-sudo zypper install -t pattern devel_basis
-sudo zypper install git curl wget
-```
-
-#### ¿Qué instala?
-
-- compiladores
-- herramientas de desarrollo
-- librerías esenciales
-- utilidades de red
-
-`devel_basis` es el equivalente directo a `build-essential`.
-
-# Mantenimiento general de WSL
-
-Independiente de la distro, WSL tiene comandos propios.
-
-### Apagar WSL (reiniciar kernel)
-
-```powershell
-wsl --shutdown
-```
-
-Útil cuando:
-- Algo falla
-- Docker se rompe
-- WSL consume RAM
-- Cambias configuraciones
-
-### Actualizar WSL
-
-```powershell
-wsl --update
-```
-
-Actualiza:
-- Kernel Linux
-- Integración con Windows
-- Mejoras de rendimiento
-
-### Ver estado de WSL
-
-```powershell
-wsl --status
-```
-
-# Buenas prácticas de mantenimiento
-
-- Actualiza tu distro al menos 1 vez por semana
-- Usa `full-upgrade` o `dist-upgrade` para evitar conflictos
-- Limpia la caché cada cierto tiempo
-- Si una distro se rompe → elimínala y crea una nueva
-- Considera usar **export/import** para tener plantillas limpias
-- Mantén tus proyectos en `/home`, no en `/mnt/c`
-
-*****
-## También puedes ver:
-[[Conceptos fundamentales de Docker]]
+## 1. Introducción al Mantenimiento de Paquetes
+
+Cada distribución dentro de WSL opera de forma independiente y posee su propio gestor de paquetes. Mantener estas instancias actualizadas no solo garantiza la compatibilidad con Docker y Python, sino que cierra vulnerabilidades de seguridad en el kernel de usuario.
+
+### 1.1 Comparativa de Gestores
+
+|**Distribución**|**Gestor**|**Comando Base**|
+|---|---|---|
+|**Ubuntu / Debian / Kali**|**APT**|`sudo apt`|
+|**Fedora**|**DNF**|`sudo dnf`|
+|**openSUSE**|**Zypper**|`sudo zypper`|
+
+## 2. Gestión en Entornos Debian-Based (APT)
+
+Es el estándar más común en WSL. Para un mantenimiento profesional, el orden de los factores sí altera el producto.
+
+- **Sincronización:** `sudo apt update` (Refresca el índice de versiones).
+    
+- **Actualización Recomendada:** `sudo apt full-upgrade -y`. A diferencia de `upgrade`, este comando gestiona cambios de dependencias y elimina paquetes obsoletos.
+    
+- **Higiene del Sistema:**
+    
+    Bash
+    
+    ```bash
+    sudo apt autoremove -y  # Elimina huérfanos
+    sudo apt clean          # Borra toda la caché de descargas
+    ```
+    
+- **Kit de Desarrollo (Build-Essential):** Vital para compilar herramientas de seguridad:
+    
+    `sudo apt install build-essential git curl wget -y`
+    
+
+## 3. Gestión en Fedora (DNF)
+
+DNF es conocido por su resolución inteligente de dependencias y su manejo de metadatos.
+
+- **Refresco Forzado:** `sudo dnf upgrade --refresh -y`. Obliga a DNF a ignorar la caché local de metadatos para buscar actualizaciones reales.
+    
+- **Limpieza Total:** `sudo dnf clean all`.
+    
+- **Herramientas de Compilación:**
+    
+    `sudo dnf groupinstall "Development Tools" -y`
+    
+
+## 4. Gestión en openSUSE (Zypper)
+
+Zypper ofrece una granularidad muy alta, ideal para entornos de laboratorio estables.
+
+- **Sincronización:** `sudo zypper refresh`.
+    
+- **Migración de Distribución:** `sudo zypper dist-upgrade -y` (Equivalente a full-upgrade).
+    
+- **Patrones de Desarrollo:**
+    
+    `sudo zypper install -t pattern devel_basis`
+    
+
+## 5. Mantenimiento del Motor WSL (Host Windows)
+
+Existen situaciones donde el mantenimiento no es dentro de la Linux, sino en el orquestador de Windows.
+
+### 5.1 Gestión de Recursos y Errores
+
+- **El "Hard Reset":** `wsl --shutdown`. Es la solución definitiva cuando el consumo de RAM de WSL se dispara o cuando Docker Desktop pierde la comunicación con el kernel.
+    
+- **Actualización del Micro-Kernel:** `wsl --update`. Microsoft publica parches de seguridad y mejoras de rendimiento para el kernel Linux de forma independiente a Windows Update.
+    
+- **Auditoría de Estado:** `wsl --status`. Muestra la versión del kernel y la distribución predeterminada.
+    
+
+## 6. Reglas de Oro de Higiene Técnica
+
+1. **Frecuencia:** Ejecutar el ciclo de actualización al menos **una vez por semana**.
+    
+2. **Localización de Datos:** Prohibido trabajar proyectos pesados en `/mnt/c/`. Los archivos de laboratorios y código deben residir en el sistema de archivos de Linux (`/home/rhodyn/`) para evitar latencia de I/O.
+    
+3. **Resiliencia:** Si una distribución de laboratorio se corrompe por una instalación fallida, no pierdas tiempo reparándola; usa `wsl --unregister` y despliega una nueva.
+    
+4. **Plantillas:** Una vez que una distro tenga su "Kit de Desarrollo" instalado, expórtala como `.tar` para tener un punto de restauración limpio.
+    
+
+---
+
+### Referencias Externas
+
+- [Microsoft Learn: Advanced settings in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)
+    
+- [Debian Wiki: APT Commands Guide](https://wiki.debian.org/Apt)
+    
+- [Fedora Docs: Managing Software with DNF](https://www.google.com/search?q=https://docs.fedoraproject.org/en-US/fedora/rawhide/system-administrators-guide/package-management/DNF/)
+    
+
+### Documentación Relacionada
+
+[[WSL]]

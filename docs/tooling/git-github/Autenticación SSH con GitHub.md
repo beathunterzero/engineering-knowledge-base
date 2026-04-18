@@ -1,317 +1,119 @@
-# ¿Qué es la autenticación SSH?
+## 1\. Definición y Fundamentos
 
-SSH es un método de autenticación basado en **claves criptográficas**, no contraseñas. Permite conectarte a GitHub sin:
+La autenticación mediante **SSH (Secure Shell)** utiliza criptografía asimétrica para establecer una conexión segura entre tu instancia de WSL y los servidores de GitHub. A diferencia de los tokens (PAT), las claves SSH permiten una comunicación persistente, más segura y sin necesidad de interactuar con contraseñas en cada operación de Git.
 
-- Escribir usuario
-- Escribir token
-- Renovar credenciales
-- Guardar contraseñas en texto plano
+## 2\. Fase de Preparación: Verificación de Existencia
 
-Es el método **más seguro y recomendado** para trabajar con GitHub desde WSL.
+Antes de generar nuevos artefactos, es imperativo auditar el estado actual del directorio de configuración SSH para evitar sobrescribir claves activas.
 
-## Verificar si ya tienes claves SSH
+### 2.1 Auditoría del Directorio
 
-Antes de generar una nueva clave, revisa si ya existe una:
+Ejecuta el siguiente comando en tu terminal de Ubuntu:
 
 ```bash
-ls ~/.ssh
+ls -la ~/.ssh
 ```
 
-Si ves archivos como:
+  * **Escenario A (Sin claves):** Si recibes `ls: cannot access '/home/rhodyn/.ssh': No such file or directory`, el entorno está limpio para comenzar.
+  * **Escenario B (Claves existentes):** Si visualizas archivos con extensión `.pub` (pública) y archivos sin extensión (privada) como `id_ed25519` o `id_rsa`, ya posees credenciales.
 
-- `id_ed25519`
-- `id_ed25519.pub`
-- `id_rsa`
-- `id_rsa.pub`
+## 3\. Generación de Claves (Algoritmo Ed25519)
 
-entonces ya tienes claves.
-Si no existe la carpeta o está vacía, continúa con el siguiente paso. Si aparece:
+GitHub recomienda el uso de **Ed25519** por su alta resistencia criptográfica y menor latencia en comparación con RSA.
 
-```code
-ls: cannot access '/home/rhodyn/.ssh': No such file or directory
-```
-
-Significa que **no tienes claves SSH**, lo cual es perfecto para comenzar desde cero.
-
-## Generar una nueva clave SSH (ed25519)
-
-GitHub recomienda usar **ed25519** (más segura y moderna que RSA).
-
-Ejecuta:
+### 3.1 Comando de Generación
 
 ```bash
-ssh-keygen -t ed25519 -C "rhodyn.ildefonso.1311@outlook.com"
+ssh-keygen -t ed25519 -C "tu_correo@ejemplo.com"
 ```
 
-Explicación de parámetros:
+  * **Ruta de almacenamiento:** Al solicitar `Enter file in which to save the key`, presiona **ENTER** para aceptar la ubicación estándar.
+  * **Manejo de Passphrase:** \* **Opción Sin Contraseña (Recomendada para WSL):** Presiona **ENTER** dos veces. Esto permite que Git realice operaciones (push/pull) de forma totalmente automatizada.
+      * **Opción Con Contraseña:** Introduce una clave. Git la solicitará cada vez que intentes conectar, a menos que uses el agente SSH de forma persistente.
 
-- `-t ed25519` → tipo de clave
-- `-C` → comentario (tu correo para identificarla)
+## 4\. Gestión del Agente SSH
 
-Cuando pregunte:
+El agente es el proceso encargado de mantener tus claves privadas cargadas en memoria y listas para su uso.
 
-```code
-Enter file in which to save the key (/home/rhodyn/.ssh/id_ed25519):
-```
-
-Presiona **Enter** para usar la ruta por defecto:
-
-Cuando pregunte por passphrase:
-
-```code
-Enter passphrase (empty for no passphrase):
-Enter same passphrase again:
-```
-
-Puedes:
-- **Presionar ENTER dos veces** (sin passphrase) → recomendado para WSL
-- O escribir una passphrase si quieres más seguridad
-
-Resultado esperado:
-- Se crea la carpeta `~/.ssh`
-- Se generan:
-    - `id_ed25519` (clave privada)
-    - `id_ed25519.pub` (clave pública)
-
-Cuando pregunte por passphrase:
-- Puedes dejarlo vacío (Enter)
-- O poner una contraseña para mayor seguridad
-
-### ¿Qué debes poner cuando te pide la passphrase?
-
-En este paso:
-
-```code
-Enter passphrase (empty for no passphrase):
-```
-
-Tienes **dos opciones válidas**, y ambas son correctas dependiendo de tu preferencia.
-
-#### Opción 1 — Presionar ENTER (sin passphrase)
-
-**Recomendado para WSL y GitHub si quieres simplicidad.**
-
-Ventajas:
-- No te pedirá contraseña cada vez que uses Git
-- Es más cómodo para desarrollo diario
-- Funciona perfecto con GitHub
-- No afecta la seguridad si tu PC está protegida
-
-Desventajas:
-- Si alguien accede a tu PC, podría usar tu clave SSH (muy improbable si tu máquina está segura)
-
-**Si quieres comodidad total, presiona ENTER otra vez.**
-
-#### Opción 2 — Escribir una passphrase
-
-**Recomendado si quieres máxima seguridad.**
-
-Ventajas:
-- La clave privada queda protegida con contraseña
-- Aunque alguien copie tu clave, no podrá usarla
-
-Desventajas:
-- Tendrás que escribir la passphrase cada vez que uses Git
-- O tendrás que cargarla en el agente SSH manualmente
-
-**Si eliges seguridad extra, escribe una contraseña y presiona ENTER.**
-
-## Agregar la clave privada al agente SSH
-
-El agente SSH mantiene tus claves cargadas en memoria.
-
-Iniciar el agente:
+### 4.1 Inicialización y Carga
 
 ```bash
+# Iniciar el daemon del agente
 eval "$(ssh-agent -s)"
-```
 
-Agregar tu clave:
-
-```bash
+# Vincular tu clave privada al agente
 ssh-add ~/.ssh/id_ed25519
 ```
 
-Debe mostrar:
+  * **Verificación:** Al finalizar, deberías ver el mensaje: `Identity added: /home/usuario/.ssh/id_ed25519`.
 
-```code
-Identity added: /home/usuario/.ssh/id_ed25519
-```
+## 5\. Registro de la Clave Pública en GitHub
 
-## Obtener la clave pública
+La **clave pública** es la que compartes con el servidor; la privada **jamás** debe salir de tu máquina.
 
-La clave pública es la que se sube a GitHub.
+1.  **Obtener contenido:** `cat ~/.ssh/id_ed25519.pub`
+2.  **Copiar:** Selecciona toda la cadena que inicia con `ssh-ed25519` y termina con tu correo.
+3.  **Configurar en Web:** \* Ve a **GitHub \> Settings \> SSH and GPG Keys**.
+      * Click en **New SSH Key**.
+      * **Título:** Ej. "Ubuntu WSL - beathunterzero".
+      * **Key Type:** Authentication Key.
+      * **Key:** Pega el contenido copiado y guarda.
 
-Mostrarla:
+## 6\. Validación Técnica de la Conexión
 
-```bash
-cat ~/.ssh/id_ed25519.pub
-```
-
-Copia TODO el contenido, incluyendo:
-
-```code
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
-```
-
-## Registrar la clave en GitHub
-
-1. Ir a GitHub
-2. Settings
-3. SSH and GPG Keys
-4. New SSH Key
-5. Título:
-
-```code
-  Ubuntu WSL - beathunterzero
-```
-
-6. Pegar la clave pública
-   - **Key type:** Authentication Key
-   - **Key:** pega la clave pública
-   - **Add SSH key**
-6. Guardar
-
-## Probar la conexión SSH
-
-Ejecuta:
+Para confirmar que GitHub reconoce tu identidad:
 
 ```bash
 ssh -T git@github.com
 ```
 
-Primera vez verás:
+  * **Advertencia inicial:** Verás un mensaje sobre la autenticidad del host. Escribe **`yes`** y presiona ENTER.
+  * **Respuesta exitosa:** `Hi [Nombre]! You've successfully authenticated, but GitHub does not provide shell access.`
 
-```code
-The authenticity of host 'github.com' can't be established.
-Are you sure you want to continue connecting (yes/no/[fingerprint])?
-```
+## 7\. Migración de Repositorios (HTTPS a SSH)
 
-Escribe:
+Si ya tienes proyectos trabajando con HTTPS (pidiendo tokens), debes "migrarlos" a SSH.
 
-```code
-yes
-```
+### 7.1 Requisito Crítico: Ubicación
 
-Si todo está bien, verás algo como:
-
-```code
-Hi Rhodyn! You've successfully authenticated, but GitHub does not provide shell access.
-```
-
-Esto confirma que:
-- Tu clave SSH funciona
-- GitHub te reconoce
-- Ya no necesitas tokens
-- Puedes hacer `git push` sin contraseñas
-
-## Configurar Git para usar SSH por defecto
-
-Si tu repositorio está usando HTTPS, cámbialo a SSH:
-### Ver URL actual:
+Debes estar **dentro de la carpeta del proyecto** que contiene el directorio oculto `.git`.
 
 ```bash
+cd ~/ruta/a/tu/proyecto
+```
+
+  * Si ejecutas comandos de Git fuera, obtendrás: `fatal: not a git repository`.
+
+### 7.2 Cambio de URL Remota
+
+```bash
+# 1. Verificar URL actual (debería mostrar https://...)
+git remote -v
+
+# 2. Cambiar URL a formato SSH
+git remote set-url origin git@github.com:usuario/nombre-repo.git
+
+# 3. Validar cambio (debería mostrar git@github.com:...)
 git remote -v
 ```
 
-Si ves algo como:
+## 8\. Resumen de Buenas Prácticas y Troubleshooting
 
-```code
-https://github.com/usuario/repositorio.git
-```
+  * **Error de Permisos:** Si el socket falla, usa `sudo chmod 666 /var/run/docker.sock` (si aplica) o revisa los permisos de `~/.ssh` (deben ser `700` para la carpeta y `600` para la clave privada).
+  * **Backup:** Si formateas tu PC, perderás el acceso SSH. Guarda una copia de `~/.ssh` en un lugar seguro.
+  * **Unicidad:** No uses la misma clave para múltiples dispositivos; genera una nueva por cada equipo.
 
-#### Asegúrate de estar dentro del proyecto
+-----
 
-Antes de ejecutar cualquier comando Git, debes estar dentro de la carpeta del proyecto.
+### Referencias Externas
 
-Ejemplo:
+  * [GitHub Documentation: Connecting with SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
+  * [SSH Academy: The Ed25519 Algorithm](https://www.google.com/search?q=https://www.ssh.com/academy/ssh/keygen%23ed25519-keys)
+  * [Arch Wiki: SSH Keys Security](https://wiki.archlinux.org/title/SSH_keys)
 
-```bash
-cd ~/projects_ubuntu/carnada
-```
+### Documentación Relacionada
 
-#### Si NO estás dentro del proyecto, Git mostrará este error:
-
-```code
-fatal: not a git repository (or any of the parent directories): .git
-```
-
-Esto significa:
-- Estás en una carpeta que NO es un repositorio Git
-- No existe un `.git` en ese directorio
-- Debes navegar a la carpeta correcta
-
-**Solución:** entrar a la carpeta del proyecto y volver a intentar.
-
-### Verifica la URL remota actual
-
-Dentro del proyecto:
-
-```bash
-git remote -v
-```
-
-Si ves algo como:
-
-```code
-origin  https://github.com/beathunterzero/carnada.git (fetch)
-origin  https://github.com/beathunterzero/caranda.git (push)
-```
-
-Entonces **sí necesitas migrar a SSH**.
-
-Cámbialo a SSH:
-
-```bash
-git remote set-url origin git@github.com:beathunterzero/carnada.git
-```
-
-(Usa el nombre real de tu repositorio. Carnada.git es un proyecto personal que estoy usando para este ejemplo)
-
-### Confirmar que la migración fue exitosa
-
-```bash
-git remote -v
-```
-
-Ahora deberías ver:
-
-```code
-origin  git@github.com:beathunterzero/carnada.git (fetch)
-origin  git@github.com:beathunterzero/carnada.git (push)
-```
-
-Esto confirma que:
-- El repositorio ya usa SSH
-- Ya no pedirá tokens
-- `git push` funcionará usando tu clave SSH
-
-## Clonar repositorios usando SSH
-
-A partir de ahora, usa:
-
-```bash
-git clone git@github.com:beathunterzero/carnada.git
-```
-
-No pedirá usuario ni token.
-
-## Ventajas de usar SSH sobre tokens
-
-|SSH|Token (PAT)|
-|---|---|
-|No expira|Expira cada 30–90 días|
-|No pide contraseña|Pide token al menos una vez|
-|Más seguro|Menos seguro|
-|Ideal para WSL|Ideal para scripts|
-|No requiere almacenamiento en texto plano|Se guarda en `~/.git-credentials`|
-
-## Buenas prácticas
-
-- Usa una clave SSH por dispositivo
-- Nombra tus claves claramente en GitHub
-- No compartas tu clave privada
-- Haz backup de tu carpeta `~/.ssh` si cambias de PC
-- Si pierdes una clave, revócala desde GitHub inmediatamente
-******
-## También puedes ver:
+[[Git]]
+[[GitHub]]
+[[Token Personal (PAT)]]
+[[Buenas prácticas y manejos avanzado]]

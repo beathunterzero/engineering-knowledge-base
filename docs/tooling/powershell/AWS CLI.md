@@ -1,78 +1,82 @@
-## Instalación de AWS CLI
+## 1. Definición y Propósito
 
-En Windows:
+La **AWS CLI** es una herramienta de código abierto que permite interactuar con los servicios de Amazon Web Services mediante comandos en el shell. Para un perfil orientado a **Cloud Security** e **Incident Response**, la CLI es vital para realizar auditorías rápidas, extraer evidencias de logs y gestionar infraestructura sin depender de la consola web.
+
+## 2. Instalación y Verificación (Windows)
+
+En Windows, el método más eficiente y moderno es utilizar el gestor de paquetes nativo `winget`.
+
+PowerShell
 
 ```powershell
+# 1. Instalación mediante Windows Package Manager
 winget install Amazon.AWSCLI
-```
 
-Verificar instalación:
-
-```powershell
+# 2. Reiniciar la terminal y verificar versión
 aws --version
 ```
 
-## Configuración inicial
+## 3. Configuración de Identidad
 
-Configurar credenciales:
+Antes de ejecutar comandos, es necesario vincular la CLI con una identidad de IAM (_Identity and Access Management_).
 
-```powershell
+### 3.1 Inicialización de Credenciales
+
+Ejecuta el comando interactivo:
+
+Bash
+
+```bash
 aws configure
 ```
 
-Solicita:
-- Access Key
-- Secret Key
-- Región
-- Formato de salida
+El sistema solicitará cuatro parámetros críticos:
 
-Ver credenciales configuradas:
+1. **AWS Access Key ID:** El identificador de tu clave.
+    
+2. **AWS Secret Access Key:** La clave secreta (solo se muestra al crear el usuario en AWS).
+    
+3. **Default region name:** Ej. `us-east-1`.
+    
+4. **Default output format:** Ej. `json` o `table`.
+    
 
-```powershell
-Get-Content ~/.aws/credentials
-```
+### 3.2 Almacenamiento Local de Secretos
 
-## Comandos básicos útiles
+Las credenciales se almacenan de forma local en archivos de texto plano. Es fundamental no compartir el acceso a esta carpeta:
 
-### Listar buckets S3
+- **Ubicación:** `~/.aws/credentials`
+    
+- **Comando de lectura (PowerShell):** `Get-Content ~/.aws/credentials`
+    
 
-```powershell
-aws s3 ls
-```
+## 4. Comandos Esenciales de Gestión
 
-### Listar instancias EC2
+Operaciones rápidas para auditoría y administración de recursos comunes:
 
-```powershell
-aws ec2 describe-instances --output table
-```
+|**Servicio**|**Comando**|**Propósito Técnico**|
+|---|---|---|
+|**S3**|`aws s3 ls`|Listado de buckets para auditoría de almacenamiento.|
+|**EC2**|`aws ec2 describe-instances`|Inventario de servidores y estado de ejecución.|
+|**IAM**|`aws iam list-users`|Revisión de identidades activas en el tenant.|
+|**S3**|`aws s3 cp <file> s3://<bucket>/`|Exfiltración controlada o respaldo de evidencias.|
 
-### Listar usuarios IAM
+### 4.1 Control de Salida (`--output`)
 
-```powershell
-aws iam list-users --output table
-```
+La CLI permite moldear la respuesta según la necesidad del analista:
 
-### Subir archivo a S3
+- **`json`:** Ideal para automatización y parsing con herramientas como `jq`.
+    
+- **`table`:** Recomendado para lectura humana y reportes rápidos.
+    
+- **`text`:** Útil para procesamiento simple en scripts de Bash o PowerShell.
+    
 
-```powershell
-aws s3 cp archivo.txt s3://mi-bucket/
-```
+## 5. Automatización con Alias en PowerShell
 
-## Formatos de salida
+Para optimizar el flujo de trabajo en incidentes, integra estos alias en tu `$PROFILE`:
 
-```powershell
---output table
---output json
---output text
-```
-
-Ejemplo:
-
-```powershell
-aws ec2 describe-instances --output json
-```
-
-## Alias útiles en PowerShell
+PowerShell
 
 ```powershell
 Set-Alias awsec2 "aws ec2 describe-instances --output table"
@@ -80,14 +84,26 @@ Set-Alias awss3 "aws s3 ls"
 Set-Alias awsiam "aws iam list-users --output table"
 ```
 
-## Buenas prácticas
+## 6. Buenas Prácticas de Seguridad (Cloud Hardening)
 
-- Nunca guardar claves en repositorios
-- Usar roles en vez de claves cuando sea posible
-- Rotar claves periódicamente
-- Usar MFA para cuentas sensibles
-- Evitar permisos `AdministratorAccess`
+- **Principio de Menor Privilegio:** Evitar el uso de `AdministratorAccess` para tareas diarias; usar políticas granulares.
+    
+- **Higiene de Secretos:** **Nunca** incluir `Access Keys` en archivos de configuración que se suban a GitHub.
+    
+- **Autenticación Fuerte:** Habilitar **MFA** (Multi-Factor Authentication) incluso para el acceso vía CLI.
+    
+- **Rotación:** Cambiar las claves de acceso periódicamente (cada 90 días) para mitigar el impacto de una posible fuga.
+    
 
-*****
-## También puedes ver:
+---
+
+### Referencias Externas
+
+- [AWS CLI User Guide: Configuring the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+    
+- [AWS IAM Best Practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
+    
+
+### Documentación Relacionada
+
 [[Azure CLI]]

@@ -1,127 +1,78 @@
-# Iniciar sesión en Kibana
+## 1. Introducción
 
-Una vez que el laboratorio está levantado:
+En un entorno SIEM profesional, la segregación de funciones es crítica. El usuario `elastic` (Superuser) solo debe emplearse para la configuración inicial y el mantenimiento del stack. Para las actividades diarias de **Threat Hunting**, es necesario crear usuarios con privilegios limitados que reduzcan el riesgo de cambios accidentales en la infraestructura.
 
-```code
-http://localhost:5601
-```
+---
 
-Inicia sesión con las credenciales por defecto:
+## 2. Acceso Administrativo
+
+Antes de crear nuevos perfiles, se debe acceder con la cuenta raíz generada en el despliegue:
+
+- **URL:** `http://localhost:5601`
+    
 - **Usuario:** `elastic`
-- **Contraseña:** `changeme`
+    
+- **Contraseña:** `changeme` (o la configurada en tu `docker-compose.yml`).
+    
 
-<img width="677" height="636" alt="image" src="https://github.com/user-attachments/assets/d867d909-d5c5-43f0-ae1b-3b6d3611f640" />
+## 3. Configuración del Usuario de Análisis
 
+Sigue esta ruta en la interfaz de Kibana para gestionar la seguridad:
 
-> Este usuario tiene permisos completos y solo debe usarse para tareas administrativas.
+1. Abre el menú lateral → **Stack Management**.
+    
+2. Busca la sección **Security** → **Users**.
+    
+3. Haz clic en el botón: **Create user**.
+    
 
-# Ir al panel de administración de usuarios
+### 3.1 Definición del Perfil "Hunter"
 
-En Kibana:
-1. Abre el menú lateral izquierdo
-2. Entra a **Stack Management**
-3. Selecciona **Security**
-4. Haz clic en **Users**
+Completa el formulario con los siguientes parámetros técnicos:
 
-<img width="1597" height="839" alt="image" src="https://github.com/user-attachments/assets/07ba3c61-1ced-4244-9d1e-63bafb819fe3" />
+- **Username:** `hunter` (Nombre de usuario para el analista).
+    
+- **Password:** Define una credencial robusta.
+    
+- **Full name:** `Threat Hunter` (Identificador para logs de auditoría).
+    
 
+### 3.2 Asignación de Roles (RBAC)
 
-Aquí verás la lista de usuarios del sistema.
+Para un analista de CTH, se recomienda el principio de menor privilegio asignando los siguientes roles específicos:
 
-# Crear un nuevo usuario
+|**Rol**|**Capacidad Técnica**|**Propósito en el Lab**|
+|---|---|---|
+|**`kibana_admin`**|Acceso total a las funciones de gestión de Kibana.|Crear Data Views y Dashboards.|
+|**`monitoring_user`**|Permiso para ver el estado de salud del stack.|Verificar que ES y Filebeat están estables.|
+|**`viewer`**|Lectura de datos en los índices.|Consultar logs en **Discover** y **Lens**.|
 
-Haz clic en:
+> **Nota de Seguridad:** Estos roles permiten realizar investigaciones completas sin otorgar permisos de `superuser`, protegiendo la integridad de los índices y la configuración del cluster.
 
-```code
-Create user
-```
+---
 
-Se abrirá un formulario con los siguientes campos:
+## 4. Validación de Acceso
 
-### Completar los datos del usuario
+Tras guardar el usuario, es mandatorio realizar una prueba de _login_ para confirmar la propagación de permisos:
 
-- **Username:**
+1. Cierra la sesión actual de `elastic`.
+    
+2. Ingresa con las credenciales de `hunter`.
+    
+3. Verifica el acceso a **Discover** y valida que puedes visualizar los logs de las plataformas (AWS, Azure, etc.) configuradas en el Data View.
+    
 
-```code
-hunter
-```
-  
-- **Password:** Una contraseña segura, por ejemplo:
+## 5. Buenas Prácticas de Gestión de Identidades
 
-```code
-MiClaveSegura123
-```
+- **Aislamiento de Cuentas:** No compartas el usuario `hunter`. Crea una identidad única para cada analista para mantener la trazabilidad de las investigaciones.
+    
+- **Usuarios de Sistema:** Nunca intentes loguearte manualmente con `kibana_system`, `logstash_system` o `beats_system`; estos son usuarios de servicio para comunicación interna.
+    
+- **Auditoría:** Revisa periódicamente la lista de usuarios activos y elimina aquellos que ya no sean necesarios tras finalizar un ejercicio de laboratorio.
+    
 
-- **Full name:**
+---
 
-```code
-Threat Hunter
-```
+### Documentación Relacionada
 
-- **Email:** Opcional
-
-<img width="1140" height="942" alt="image" src="https://github.com/user-attachments/assets/8e7a2c9d-0ae8-44ce-a62a-c646dd49adcc" />
-
-
-# Asignar roles para Threat Hunting
-
-En la sección **Roles**, selecciona:
-- `kibana_admin`
-- `monitoring_user`
-- `viewer`
-
-Estos roles permiten:
-
-|Rol|Permiso|
-|---|---|
-|**kibana_admin**|Administrar Kibana sin privilegios críticos|
-|**monitoring_user**|Ver métricas del stack|
-|**viewer**|Ver dashboards, Discover, Lens|
-
-<img width="1105" height="313" alt="image" src="https://github.com/user-attachments/assets/66219448-0208-4687-9d4c-3b79873b7097" />
-
-
-> Estos roles son suficientes para un analista de Threat Hunting sin exponer permisos peligrosos como `superuser`.
-
-# Guardar el usuario
-
-Haz clic en:
-
-```code
-Create user
-```
-
-El usuario quedará registrado inmediatamente.
-
-# Probar el acceso
-
-Cierra sesión en Kibana y vuelve a entrar con:
-
-- **Usuario:** `hunter`
-- **Contraseña:** `MiClaveSegura123`
-
-<img width="627" height="700" alt="image" src="https://github.com/user-attachments/assets/48db24f2-d140-4fe9-9882-2a10f79af20d" />
-
-
-Si todo está correcto, podrás:
-
-- acceder a Discover
-- visualizar dashboards
-- crear Data Views
-- analizar logs enviados por Filebeat
-
-<img width="1902" height="1128" alt="image" src="https://github.com/user-attachments/assets/ad5981cf-e935-437b-99d4-ec347e161d59" />
-
-
-# Buenas prácticas
-
-- No uses `elastic` para tareas diarias
-- No uses `kibana_system` para iniciar sesión (es un usuario interno)
-- Crea un usuario por analista
-- Usa contraseñas fuertes
-- Documenta roles y permisos asignados
-
-******
-## Puedes ver también:
-[[Docker Compose]]
 [[Creación de elastic-security-lab]]

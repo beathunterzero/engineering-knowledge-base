@@ -1,4 +1,12 @@
-# Importaciones y configuración inicial
+## 1. Introducción al Proyecto
+
+`carnada.py` es una herramienta táctica de generación de contraseñas, hashing y cifrado simétrico escrita en Python. Su objetivo es proporcionar una utilidad de línea de comandos robusta para la gestión segura de credenciales, utilizando algoritmos criptográficos modernos (AES-GCM y ChaCha20-Poly1305) y derivación de claves mediante PBKDF2.
+
+---
+
+## 2. Desglose del Código Línea por Línea
+
+### 2.1 Importaciones y Configuración Inicial
 
 ```python
 import argparse
@@ -32,7 +40,7 @@ import os
 - `import base64`: Para codificar bytes en texto base64 (legible y almacenable).
 - `import os`: Para generar bytes aleatorios (`os.urandom`) y otras funciones del sistema.
 
-# Constantes de configuración
+### 2.2 Constantes de Configuración
 
 ```python
 CARACTERES_SEGUROS = (
@@ -62,7 +70,7 @@ NONCE_SIZE = 12  # recomendado para AESGCM y ChaCha20Poly1305
 - `SALT_SIZE`: Tamaño del salt en bytes (16).
 - `NONCE_SIZE`: Tamaño del nonce (12 bytes), recomendado para AES-GCM y ChaCha20-Poly1305.
 
-# Generación de contraseñas y hashes
+### 2.3 Generación de contraseñas y hashes
 
 ```python
 def generar_contrasena(longitud: int, incluir_mayus: bool, incluir_minus: bool,
@@ -122,7 +130,7 @@ def generar_hash_sha512(texto: str) -> str:
 - `generar_hash_sha512`:
     - Igual que la anterior, pero usando SHA-512.
 
-# KDF y cifrado
+### 2.4 KDF y cifrado
 
 ```python
 def derivar_clave_desde_passphrase(passphrase: str, salt: bytes) -> bytes:
@@ -196,7 +204,7 @@ def cifrar_con_chacha20(plaintext: str, key: bytes, salt: bytes) -> dict:
 
 - Devuelve la misma estructura, pero indicando el algoritmo ChaCha20-Poly1305.
 
-# Guardado en archivo
+### 2.5 Guardado en archivo
 
 ```python
 def guardar_en_archivo_modo_todo(usuario: str, contrasena: str,
@@ -258,7 +266,7 @@ def guardar_en_archivo_solo_chacha(usuario: str, chacha_info: dict, passphrase: 
 
 - Guarda solo usuario, clave maestra y datos de ChaCha.
 
-# Argumentos de línea de comandos
+### 2.6 Argumentos de línea de comandos
 
 ```python
 def configurar_argumentos():
@@ -322,7 +330,7 @@ def configurar_argumentos():
 
 - Devuelve el objeto `args` con todos los argumentos parseados.
 
-# Función principal `main()`
+### 2.7 Función principal `main()`
 
 ```python
 def main():
@@ -426,7 +434,7 @@ def main():
     - `aes`: solo AES.
     - `chacha`: solo ChaCha.
 
-# Salida en pantalla
+### 2.8 Salida en pantalla
 
 ```python
     print("\\n" + "="*70)
@@ -442,7 +450,7 @@ def main():
 
 Luego, según `args.cipher`, imprime distintos bloques:
 
-# Caso `cipher == "none"`
+### 2.9 Caso `cipher == "none"`
 
 ```python
     if args.cipher == "none":
@@ -469,7 +477,7 @@ Luego, según `args.cipher`, imprime distintos bloques:
     - Explicación de AES-256-GCM y sus parámetros (salt, nonce, ciphertext).
     - Explicación de ChaCha20-Poly1305 y sus parámetros.
 
-# Caso `cipher == "aes"`
+### 2.10 Caso `cipher == "aes"`
 
 ```python
     elif args.cipher == "aes":
@@ -482,7 +490,7 @@ Luego, según `args.cipher`, imprime distintos bloques:
 
 - Solo muestra la información de AES.
 
-# Caso `cipher == "chacha"`
+### 2.11 Caso `cipher == "chacha"`
 
 ```python
     elif args.cipher == "chacha":
@@ -501,7 +509,7 @@ Luego, según `args.cipher`, imprime distintos bloques:
 
 - Línea final de cierre visual.
 
-# Guardado según modo
+### 2.12 Guardado según modo
 
 ```python
     if args.save:
@@ -527,7 +535,7 @@ Luego, según `args.cipher`, imprime distintos bloques:
 
 - Mensaje final de advertencia.
 
-# Bloque `if __name__ == "__main__":`
+### 2.13 Bloque `if __name__ == "__main__":`
 
 ```python
 if __name__ == "__main__":
@@ -547,5 +555,21 @@ if __name__ == "__main__":
     - Si ocurre cualquier otra excepción, muestra el error y sale con código 1.
 
 *****************
-## También puedes ver
+### Referencias Externas
+
+- [Python Cryptography: Fernet vs AEAD](https://www.google.com/search?q=https://cryptography.io/en/latest/hazmat/primitives/ciphers/aead/)
+    
+- [NIST: Recommendation for Key Derivation (PBKDF2)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf)
+    
+
+### Documentación Relacionada
+
 [[Python para WSL]]
+[[Automatización y scripting en Python]]
+[[Buenas prácticas en Python]]
+[[Estructura de proyectos en Python]]
+[[Gestión de dependencias en Python]]
+[[Git]]
+[[GitHub]]
+[[Mover repositorios Git y GitHub de manera local]]
+[[Visibilidad de repositorios]]

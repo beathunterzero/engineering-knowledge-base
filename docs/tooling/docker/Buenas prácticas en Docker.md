@@ -1,163 +1,104 @@
-# Buenas prácticas para Docker en general
-## No usar Docker Desktop UI
+## 1. Optimización del Entorno de Ejecución
 
-Aunque Docker Desktop es cómodo visualmente, **no es ideal para entornos técnicos avanzados**.
+La eficiencia en el uso de contenedores comienza por la elección del motor y la interfaz. En entornos de ingeniería y ciberseguridad, el rendimiento y el control son prioridades sobre la estética visual.
 
-### Problemas principales
+### 1.1 Desestimación de Docker Desktop UI
 
-- **Consume más RAM** La interfaz gráfica y los servicios adicionales cargan procesos innecesarios.
-- **Consume más CPU** Docker Desktop ejecuta servicios en segundo plano que aumentan el uso del procesador.
-- **No aporta valor técnico real** Todo lo que hace la UI puede hacerse más rápido y mejor desde CLI.
+Aunque funcional para principiantes, la interfaz gráfica de Docker Desktop presenta desventajas críticas para perfiles técnicos:
 
-### Recomendación
+- **Consumo de Recursos:** Carga procesos adicionales que elevan el uso de RAM y CPU innecesariamente.
+    
+- **Limitación Operativa:** La UI oculta la verbosidad de los errores y limita la velocidad que ofrece la **CLI (Command Line Interface)**.
+    
+- **Recomendación:** Migrar hacia **Docker Engine nativo en WSL2** para obtener un entorno más ligero y cercano a una implementación real de servidor Linux.
+    
 
-Usar **Docker Engine + WSL2** o Docker nativo en Linux para un entorno más limpio y eficiente.
+### 1.2 Implementación de WSL2 como Backend
 
-## Usar WSL2 como backend
+WSL2 (Windows Subsystem for Linux) es el estándar _de facto_ para ejecutar Docker en Windows de forma eficiente.
 
-WSL2 es la forma más eficiente de ejecutar Docker en Windows.
+- **Rendimiento:** Utiliza un kernel Linux real, optimizando el manejo de procesos y archivos.
+    
+- **Arquitectura:** Es más liviano que las máquinas virtuales tradicionales basadas en Hyper-V.
+    
+- **Integración:** Permite el uso nativo de scripts bash y herramientas de auditoría de Linux.
+    
 
-### Ventajas
+## 2. Higiene y Gestión de Recursos
 
-- **Más rápido** WSL2 usa un kernel Linux real, lo que mejora el rendimiento de contenedores.
-- **Más ligero** No requiere máquinas virtuales pesadas como Hyper-V.
-- **Mejor integración con Linux** Permite usar herramientas nativas, scripts y entornos reales de Linux.
+Un entorno saturado de artefactos huérfanos degrada el rendimiento y dificulta la administración.
 
-### Recomendación
+### 2.1 Mantenimiento de Imágenes y Contenedores
 
-Instalar Docker Engine dentro de WSL2 y evitar Docker Desktop cuando sea posible.
+Es imperativo realizar limpiezas periódicas para liberar almacenamiento:
 
-## Mantener solo imágenes necesarias
+- **Imágenes Dangling:** Eliminar imágenes sin etiqueta que no están en uso.
+    
+    `docker image prune`
+    
+- **Contenedores Detenidos:** Limpiar instancias que ya no cumplen ninguna función.
+    
+    `docker container prune`
+    
 
-Las imágenes ocupan espacio rápidamente. Mantener solo las necesarias evita desperdicio de almacenamiento.
+### 2.2 Estandarización de Despliegue
 
-```bash
-docker image prune
-```
+- **Nombrado Explícito:** Evitar nombres aleatorios (ej. `sleepy_morse`). Siempre definir el nombre para facilitar el monitoreo y la documentación.
+    
+    `docker run -d --name lab_analisis debian`
+    
+- **Modo Interactivo:** Para tareas de análisis manual o pentesting, el uso de `-it` es fundamental para obtener una pseudo-terminal funcional.
+    
+    `docker run -it --name kali_audit kali-rolling /bin/bash`
+    
 
-### Qué hace:
+## 3. Aplicación en CTI (Cyber Threat Intelligence) y CTH
 
-- Elimina imágenes **dangling** (sin etiqueta).
-- Libera espacio sin afectar imágenes en uso.
+Docker es una herramienta de aislamiento crítica para el análisis de amenazas y la simulación de adversarios.
 
-### Consejo:
+### 3.1 Análisis de Malware y Aislamiento
 
-Ejecutarlo semanalmente o después de pruebas grandes.
+El objetivo es contener la ejecución maliciosa para que no afecte al host:
 
-## Limpiar contenedores detenidos regularmente
+- **Aislamiento de Red:** Ejecutar contenedores sin acceso a internet si no es estrictamente necesario.
+    
+    `docker run --network none --name sandbox_malware ...`
+    
+- **Restricción de Volúmenes:** Prohibir el montaje de directorios del sistema real para evitar fugas de información o compromiso del host.
+    
 
-Los contenedores detenidos no aportan nada y ocupan espacio.
+### 3.2 Reproducción de TTPs (MITRE ATT&CK)
 
-```bash
-docker container prune
-```
+Para laboratorios de **Red Team** o **Purple Team**:
 
-### Qué hace:
+- **Contenedores Efímeros:** Usar el flag `--rm` para que el contenedor se elimine automáticamente al finalizar, garantizando un entorno limpio en cada prueba.
+    
+    `docker run --rm -it alpine sh`
+    
+- **Imágenes Minimalistas:** Preferir distribuciones como `alpine` o `debian-slim` para acelerar el despliegue de escenarios de ataque.
+    
 
-- Elimina todos los contenedores **detenidos**.
-- Mantiene tu entorno limpio y ordenado.
+### 3.3 Infraestructura de OSINT
 
-### Consejo:
+Utilizar contenedores para aislar herramientas de recolección de información (Spiderfoot, Maltego, etc.):
 
-Ideal después de laboratorios o pruebas rápidas.
+- **Modularidad:** Cada herramienta reside en su propio contenedor, evitando conflictos de dependencias en el host.
+    
+- **Reproducibilidad:** Facilita la creación de entornos idénticos para todo el equipo de analistas.
+    
 
-## Nombrar contenedores siempre
+---
 
-Nunca dejes que Docker asigne nombres aleatorios como `sleepy_morse`.
+### Referencias Externas
 
-```bash
-docker run -it --name debianlab debian bash
-```
+- [Docker Best Practices for Production](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
+    
+- [WSL2 Architecture and Performance](https://learn.microsoft.com/en-us/windows/wsl/compare-versions)
+    
+- [Hardening Docker Containers (CISA/NIST Guidelines)](https://www.cisecurity.org/benchmark/docker)
+    
 
-### Beneficios:
+### Documentación Relacionada
 
-- Facilita detener, iniciar o inspeccionar contenedores.
-- Mejora la documentación.
-- Evita confusiones en entornos con múltiples contenedores.
-
-## Usar `-it` para laboratorios interactivos
-
-Cuando necesitas una terminal dentro del contenedor:
-
-```bash
-docker run -it kali-rolling bash
-```
-
-### ¿Por qué?
-
-- `-i` mantiene STDIN abierto.
-- `-t` asigna una pseudo-terminal.
-- Permite trabajar como si fuera una máquina real.
-
-Ideal para:
-- Pentesting
-- Análisis manual
-- Pruebas de herramientas
-
-## Evitar contenedores huérfanos
-
-Un contenedor huérfano es uno que queda ejecutándose sin supervisión.
-
-### Siempre detenerlos:
-
-```bash
-docker stop <id>
-```
-
-### Riesgos de dejarlos vivos:
-
-- Consumo innecesario de recursos.
-- Puertos abiertos sin control.
-- Procesos corriendo sin monitoreo.
-- Riesgos de seguridad en entornos sensibles.
-
-# Buenas prácticas para CTI/CTH
-
-Estas recomendaciones son clave para entornos de ciberseguridad, análisis de amenazas y simulación de TTPs.
-
-## Para análisis de malware
-
-El objetivo es aislar completamente el entorno.
-
-### Recomendaciones:
-
-- **Usar contenedores aislados** Sin redes externas o con redes controladas.
-- **No montar volúmenes del host** Evita que el malware acceda a tu sistema real.
-- **No exponer puertos innecesarios** Reduce superficie de ataque.
-
-### Opciones útiles:
-
-```bash
-docker run --network none ...
-docker run -v /dev/null:/host ...
-```
-
-## Para reproducir TTPs (Técnicas, Tácticas y Procedimientos)
-
-Ideal para laboratorios de Red Team, Purple Team o simulaciones MITRE ATT&CK.
-
-### Recomendaciones:
-
-- **Usar imágenes ligeras** `alpine`, `debian`, `ubuntu-minimal` → más rápidas y fáciles de resetear.
-- **Crear contenedores efímeros** No guardar estado, siempre recrear desde cero.
-- **Documentar comandos** Para reproducibilidad y auditoría.
-
-### Ejemplo de contenedor efímero:
-
-```bash
-docker run --rm -it debian bash
-```
-
-## Para OSINT
-
-Docker es ideal para aislar herramientas de OSINT.
-
-### Recomendaciones:
-
-- **Usar contenedores con herramientas específicas** Ejemplo: contenedores para Maltego, Spiderfoot, Recon-ng.
-- **Evitar instalar herramientas en el host** Mantiene tu sistema limpio y evita conflictos.
-- **Crear entornos reproducibles** Facilita compartir configuraciones con equipos.
-
-************
-## También puedes ver:
-[[Comandos esenciales en Docker]]
+[[Conceptos fundamentales de Docker]]
+[[Docker Compose]]

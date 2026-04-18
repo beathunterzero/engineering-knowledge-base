@@ -1,160 +1,91 @@
-# ¿Qué es WSL?
+## 1. ¿Qué es WSL?
 
-WSL (_Windows Subsystem for Linux_) es una capa de compatibilidad que permite ejecutar distribuciones Linux dentro de Windows **sin máquinas virtuales** y **sin dual boot**.
+**WSL** es una capa de compatibilidad desarrollada por Microsoft que permite ejecutar un entorno de Linux completo directamente en Windows. A diferencia de las máquinas virtuales tradicionales (como VMware), WSL utiliza una arquitectura de micro-VM ligera que se integra profundamente con el kernel de Windows, eliminando la necesidad de gestionar recursos pesados o configurar _dual-boot_.
 
-En términos simples:
-- Es Linux corriendo dentro de Windows
-- Con acceso directo al hardware
-- Con integración total con el sistema de archivos
-- Ideal para desarrollo (Python, Git, Docker, Node, etc.)
+### 1.1 El Mejor de los Dos Mundos
 
-WSL te permite tener lo mejor de ambos mundos:
-- La comodidad de Windows
-- La potencia y flexibilidad de Linux
+- **Productividad de Windows:** Mantienes tus herramientas de diseño, comunicación y oficina.
+    
+- **Potencia de Linux:** Acceso nativo a herramientas de CTH, compiladores de Python, gestión de contenedores Docker y flujos de trabajo basados en terminal (Bash/Zsh).
+    
 
-## ¿Qué versión de WSL usar?
+## 2. Selección de Versión: WSL 1 vs. WSL 2
 
-### WSL 2 (recomendado)
+Para entornos de ingeniería y ciberseguridad, **WSL 2** es el estándar mandatorio.
 
-- Kernel Linux real
-- Mejor rendimiento
-- Mejor compatibilidad
-- Soporte para Docker
+- **WSL 2:** Utiliza un kernel de Linux real, ofrece un rendimiento de archivos significativamente superior y es el único que soporta **Docker Engine** de forma nativa.
+    
+- **Verificación:** Ejecuta en PowerShell: `wsl --version` o `wsl -l -v`.
+    
 
-### Cómo verificar tu versión:
+## 3. Despliegue e Instalación
 
-```powershell
-wsl --version
-```
+El proceso de instalación moderno se ha simplificado a un solo comando en una terminal de Windows con privilegios de administrador.
 
-## Instalar WSL en Windows
-
-### Instalación rápida (Windows 10/11):
+PowerShell
 
 ```powershell
+# Instalación automática (incluye kernel y Ubuntu por defecto)
 wsl --install
-```
 
-Esto instala:
-- WSL 2
-- Ubuntu (por defecto)
-- Kernel Linux
-- Configuración inicial
-
-### Ver distribuciones disponibles:
-
-```powershell
+# Explorar otras distribuciones disponibles (Kali, Debian, etc.)
 wsl --list --online
-```
 
-## Instalar una distribución Linux
-
-Ejemplo: instalar Ubuntu 22.04
-
-```powershell
+# Instalación de una distro específica
 wsl --install -d Ubuntu-22.04
 ```
 
-Otras distribuciones comunes:
-- Debian
-- Kali Linux
-- openSUSE
-- Fedora Remix
+## 4. Configuración Inicial en la Distribución
 
-### Ver distribuciones instaladas:
+Al iniciar una nueva instancia, se debe establecer la identidad del usuario Linux (independiente del usuario de Windows) y preparar el sistema para el trabajo técnico.
 
-```powershell
-wsl --list --verbose
-```
+Bash
 
-# ## 🟦 5. Primeros pasos dentro de WSL
-
-Cuando abras Ubuntu por primera vez:
-
-- Te pedirá crear un usuario Linux
-    
-- Ese usuario será tu cuenta principal
-    
-- Tendrás acceso a `/home/tu_usuario`
-    
-
-### Actualizar paquetes:
-
-bash
-
-```
+```bash
+# Sincronización de repositorios y parcheo de seguridad
 sudo apt update && sudo apt upgrade -y
-```
 
-### Instalar herramientas básicas:
-
-bash
-
-```
+# Instalación del kit de supervivencia (compiladores y red)
 sudo apt install build-essential git curl wget -y
 ```
 
-## Integración con Windows
+## 5. Interoperabilidad (Cruce de Archivos)
 
-WSL permite acceder a Windows desde Linux y viceversa.
-### Desde WSL → Windows:
+WSL rompe las barreras entre sistemas de archivos, facilitando el análisis de artefactos forenses que residen en Windows desde la potencia de Linux.
 
-```bash
-cd /mnt/c
-cd /mnt/d
-```
+|**Dirección**|**Método**|**Ruta / Comando**|
+|---|---|---|
+|**Linux → Windows**|Puntos de montaje|`/mnt/c/Users/`|
+|**Windows → Linux**|Ruta de red|`\\wsl$`|
+|**Exploración Visual**|Desde WSL|`explorer.exe .`|
 
-### Desde Windows → WSL:
+## 6. Operaciones de Ciclo de Vida y Backup
 
-En el explorador:
+Como medida de resiliencia en laboratorios de CTH, es vital saber cómo respaldar y destruir instancias sin afectar el sistema host.
 
-```code
-\\wsl$
-```
+- **Auditoría:** `wsl --status` (Muestra versión de kernel y estado de red).
+    
+- **Mantenimiento:** `wsl --update` (Actualiza el kernel a la última versión de seguridad).
+    
+- **Backup (Exportar):** `wsl --export Ubuntu D:\Backups\ubuntu_cth.tar`
+    
+- **Restauración (Importar):** `wsl --import Ubuntu_Lab D:\WSL\Lab D:\Backups\ubuntu_cth.tar`
+    
+- **Destrucción (Unregister):** `wsl --unregister <NombreDistro>` (Borra permanentemente la distro y sus archivos).
+    
 
-## Mantenimiento de distribuciones
+---
 
-### Ver estado de WSL:
+### Referencias Externas
 
-```powershell
-wsl --status
-```
+- [Microsoft Learn: WSL Official Documentation](https://learn.microsoft.com/en-us/windows/wsl/)
+    
+- [Microsoft Learn: Comparing WSL 1 and WSL 2](https://learn.microsoft.com/en-us/windows/wsl/compare-versions)
+    
 
-### Actualizar WSL:
+### Documentación Relacionada
 
-```powershell
-wsl --update
-```
-
-### Reiniciar WSL:
-
-```powershell
-wsl --shutdown
-```
-
-### Exportar una distribución (backup):
-
-```powershell
-wsl --export Ubuntu ubuntu_backup.tar
-```
-
-### Importar una distribución:
-
-```powershell
-wsl --import Ubuntu2 D:\WSL\Ubuntu2 ubuntu_backup.tar
-```
-
-### Eliminar una distribución:
-
-```powershell
-wsl --unregister Ubuntu
-```
-
-*****
-## Puedes ver también
 [[Mantenimiento de distribuciones]]
-[[Powershell]]
-[[Git]]
-[[Estructura de un repositorio]]
+[[Python para WSL]]
 [[Token Personal (PAT)]]
 [[Autenticación SSH con GitHub]]

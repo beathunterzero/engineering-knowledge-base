@@ -1,185 +1,85 @@
-# Imagen
+## 1. La Imagen: El Plano Estático
 
-Una **imagen** es la base de todo en Docker.
+Una imagen es una **plantilla inmutable** y de solo lectura que sirve como cimiento para los contenedores.
 
-### ¿Qué es exactamente una imagen?
+- **Composición:** Se estructura en capas (layers) que incluyen el OS base, binarios, dependencias y configuraciones.
+    
+- **Naturaleza:** Es estática; no ejecuta procesos por sí misma.
+    
+- **Analogía:** Es el equivalente a un archivo **ISO** o una **receta** de cocina.
+    
+- **Ejemplos:** `ubuntu`, `nginx`, `python:3.12`.
+    
 
-- Es una **plantilla inmutable**: una vez creada, no cambia.
-- Contiene:
-    - Sistema operativo base (ej. Debian, Alpine)
-    - Binarios y dependencias
-    - Configuración inicial
-    - Scripts o entrypoints
-- Se construye por capas (_layers_), lo que permite reutilización y eficiencia.
+## 2. El Contenedor: La Instancia Viva
 
-### Idea clave
+Un contenedor es la ejecución de una imagen. Es un entorno aislado y seguro donde corren las aplicaciones.
 
-Una imagen es como un **ISO** o una **fotografía congelada** de un sistema.
+- **Naturaleza:** Mutable (mientras está activo) y ejecutable.
+    
+- **Estado:** Puede iniciarse, detenerse y eliminarse. Utiliza un sistema de archivos _Copy-on-Write_ (CoW).
+    
+- **Analogía:** Si la imagen es la receta, el contenedor es el **plato servido**.
+    
 
-### Ejemplos comunes de imágenes
+### 2.1 Matriz Comparativa: Imagen vs. Contenedor
 
-- `ubuntu` → sistema base
-- `debian` → sistema base estable
-- `python:3.12` → Python preinstalado
-- `nginx` → servidor web listo para usar
+|**Característica**|**Imagen**|**Contenedor**|
+|---|---|---|
+|**Definición**|Plantilla / Clase|Instancia / Objeto|
+|**Estado**|Inmutable (No cambia)|Mutable (Puede cambiar)|
+|**Actividad**|Estática (No ejecuta)|Dinámica (Ejecuta procesos)|
+|**Persistencia**|Permanente (Se almacena)|Efímera (Se desecha)|
 
-### Características importantes
+## 3. Dinámica de Ejecución (`docker run`)
 
-- No ejecuta procesos por sí misma.
-- Puede ser versionada: `python:3.12`, `python:3.10`.
-- Puede ser personalizada con un `Dockerfile`.
+Cada ejecución del comando `docker run` genera un **nuevo contenedor**, independientemente de si la imagen ya ha sido utilizada anteriormente.
 
-# Contenedor
+1. **Localización:** Busca la imagen local; si no, la descarga (_pull_).
+    
+2. **Creación:** Instancia un contenedor único con su propio ID writable.
+    
+3. **Ejecución:** Inicia el proceso definido (_entrypoint_).
+    
+4. **Finalización:** Al terminar el proceso, el contenedor pasa a estado `Exited`, pero sigue existiendo en el disco hasta ser removido (`rm`).
+    
 
-Un **contenedor** es una instancia viva de una imagen.
+## 4. Arquitectura del Docker Engine
 
-### Qué es un contenedor
+El Engine es el software cliente-servidor que orquesta los componentes de Docker.
 
-- Es un **entorno aislado** que ejecuta procesos.
-- Se crea a partir de una imagen.
-- Puede tener cambios temporales (archivos, configuraciones, logs).
-- Puede iniciarse, detenerse, reiniciarse o eliminarse.
+- **containerd:** Daemon que gestiona el ciclo de vida completo de los contenedores (transferencia de imágenes, ejecución, almacenamiento y redes).
+    
+- **runc:** Herramienta de línea de comandos para ejecutar contenedores según la especificación OCI (_Open Container Initiative_).
+    
+- **Networking & Storage:** Componentes encargados de la comunicación entre contenedores (bridge, host) y la persistencia de datos (volúmenes).
+    
 
-### Idea clave
+## 5. Implementación en WSL (Windows)
 
-Si la imagen es la **receta**, el contenedor es el **plato servido**.
+Docker Desktop opera en Windows mediante dos distribuciones específicas de WSL que separan la lógica de los datos:
 
-### Características
+- **docker-desktop:** Distribución que aloja el motor (**Docker Engine**) y los daemons necesarios.
+    
+- **docker-desktop-data:** Repositorio persistente donde se almacenan físicamente las **imágenes, contenedores y volúmenes**.
+    
 
-- Tiene su propio sistema de archivos (copy-on-write).
-- Puede tener redes, volúmenes y puertos asignados.
-- Su estado no es permanente a menos que se use un volumen.
+> **Nota de Seguridad:** No manipular manualmente los archivos dentro de estas distribuciones en WSL, ya que cualquier cambio directo puede corromper la instancia de Docker Desktop.
 
-# Diferencia clave entre Imagen y Contenedor
+---
 
-|Imagen|Contenedor|
-|---|---|
-|Plantilla|Instancia|
-|No cambia|Puede cambiar|
-|No ejecuta procesos|Ejecuta procesos|
-|Se almacena|Se ejecuta|
-|Inmutable|Mutable|
-|Reutilizable|Desechable|
+### Referencias Externas
 
-# ¿Por qué `docker run` crea contenedores nuevos?
+- [Docker Overview: Images and Containers](https://docs.docker.com/get-started/overview/)
+    
+- [Deep dive into containerd and runc](https://www.google.com/search?q=https://www.docker.com/blog/containerd-vs-runtime/)
+    
+- [Docker Desktop WSL 2 backend architecture](https://docs.docker.com/desktop/wsl/)
+    
 
-Cada vez que ejecutas:
+### Documentación Relacionada
 
-```bash
-docker run hello-world
-```
-
-Docker realiza:
-1. Busca la imagen localmente.
-2. Si no existe, la descarga.
-3. Crea un contenedor nuevo basado en esa imagen.
-4. Ejecuta el proceso definido en la imagen.
-5. El proceso termina.
-6. El contenedor queda detenido.
-
-### ¿Por qué se acumulan contenedores?
-
-Porque **cada** `docker run` **crea un contenedor nuevo**, incluso si usas la misma imagen.
-
-Ejemplo:
-
-```bash
-docker ps -a
-```
-
-Verás muchos contenedores "Exited".
-
-# Contenedores persistentes vs no persistentes
-
-## Contenedores no persistentes (ejemplo: hello-world)
-
-- Ejecutan un proceso corto.
-- Terminan inmediatamente.
-- No se pueden reiniciar porque su proceso ya finalizó.
-
-Ejemplo:
-
-```bash
-docker run hello-world
-```
-
-## Contenedores persistentes (ejemplo: Debian)
-
-```bash
-docker run -it --name debianlab debian bash
-```
-
-Puedes detenerlo y volver a entrar:
-
-```bash
-docker stop debianlab
-docker start -ai debianlab
-```
-
-### ¿Por qué este sí es persistente?
-
-Porque el proceso `bash` puede iniciarse y detenerse sin destruir el contenedor.
-
-# Qué es el Docker Engine
-
-El **Docker Engine** es el corazón de Docker. Es el motor que permite:
-
-- Crear contenedores
-- Ejecutarlos
-- Gestionar redes
-- Gestionar almacenamiento
-- Descargar imágenes
-
-### Componentes principales
-
-#### containerd
-
-- Servicio que gestiona el ciclo de vida de contenedores.
-- Es el "administrador" de contenedores.
-
-#### runc
-
-- Ejecuta contenedores a nivel del sistema.
-- Implementa el estándar OCI.
-
-#### Networking
-
-- Maneja redes:
-    - bridge
-    - host
-    - overlay
-    - macvlan
-
-#### Almacenamiento
-
-- Maneja capas de imágenes y sistemas de archivos.
-### Idea clave
-
-Docker Engine es el **motor**, containerd es el **administrador**, runc es el **ejecutor**.
-
-# Qué son `docker-desktop` y `docker-desktop-data` en WSL
-
-Cuando usas Docker Desktop en Windows, este crea dos distribuciones WSL:
-
-### docker-desktop
-
-- Contiene el entorno donde corre el Docker Engine.
-- Es donde vive el daemon.
-
-### docker-desktop-data
-
-- Almacena:
-    - Imágenes
-    - Contenedores
-    - Volúmenes
-    - Configuraciones internas
-
-### Advertencia importante
-
-**Nunca debes modificar estos entornos manualmente.** Podrías corromper Docker Desktop.
-
-*****************
-## También puedes ver:
 [[Instalación y configuración con WSL de Docker]]
 [[Comandos esenciales en Docker]]
+[[Docker Compose]]
 [[Buenas prácticas en Docker]]
