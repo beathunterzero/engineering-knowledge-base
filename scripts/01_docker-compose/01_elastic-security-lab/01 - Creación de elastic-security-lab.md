@@ -37,93 +37,103 @@ elastic-security-lab/
 
 ## 3. Desglose Técnico: docker-compose.yml
 
-### 3.1 Servicio: Elasticsearch (es01)
+A continuación, se explica la función de cada directiva configurada en el orquestador:
 
-Es el motor de base de datos y búsqueda.
+### **Servicio: Elasticsearch (es01)**
 
-- `image: ...:8.17.10`: Versión LTS estable para abril 2026.
+Es el corazón del stack; encargado del almacenamiento y el indexado de los datos.
+
+- **`image: ...:8.17.10`**: Utiliza la imagen oficial de Elastic. La versión 8.x incluye el motor de seguridad habilitado por defecto.
     
-- `container_name: es01`: Identificador único del contenedor.
+- **`container_name: es01`**: Asigna un nombre estático al contenedor para facilitar la resolución DNS interna.
     
-- `restart: unless-stopped`: Garantiza que el servicio suba tras un reinicio del host.
+- **`environment`**:
     
-- `environment`:
-    
-    - `node.name=es01`: Nombre del nodo en el cluster.
+    - **`node.name=es01`**: Define el nombre del nodo dentro del cluster.
         
-    - `discovery.type=single-node`: Configuración para laboratorio (un solo servidor).
+    - **`discovery.type=single-node`**: Configura Elasticsearch para operar de forma independiente, eliminando las comprobaciones de quorum de un cluster multi-nodo.
         
-    - `xpack.security.enabled=true`: Habilita el control de accesos.
+    - **`xpack.security.enabled=true`**: Habilita el control de acceso basado en roles (RBAC).
         
-    - `ELASTIC_PASSWORD=changeme`: Define la clave maestra inicial.
+    - **`ELASTIC_PASSWORD=changeme`**: Establece la contraseña inicial para el usuario `elastic`.
         
-    - `xpack.security.http.ssl.enabled=false`: Desactiva SSL para simplificar la conectividad en entorno local.
+    - **`xpack.security.http.ssl.enabled=false`**: Desactiva el cifrado SSL para las conexiones HTTP. **Nota:** Solo se recomienda en entornos de laboratorio para simplificar la ingesta inicial.
         
-    - `ES_JAVA_OPTS=-Xms2g -Xmx2g`: Reserva **2GB de RAM** fijos para el proceso Java.
+    - **`ES_JAVA_OPTS=-Xms2g -Xmx2g`**: Asigna 2GB de memoria RAM mínima y máxima a la JVM. Esto evita que Java consuma memoria dinámicamente y degrade el host.
         
-- `ulimits.memlock`: Permite que Elasticsearch bloquee su memoria para evitar que el sistema la mueva al disco (mejorando el rendimiento).
+- **`ulimits.memlock`**: Establece límites `soft` y `hard` en `-1` (ilimitado). Esto permite que Elasticsearch bloquee su memoria en RAM y evita que el sistema operativo la mueva al área de intercambio (swap) en disco, lo que causaría latencias críticas.
     
-- `volumes`: Mapea `esdata` para que los logs no se borren al apagar el contenedor.
-    
-- `ports`: Expone el puerto `9200` para comunicación con la base de datos.
-    
-- `healthcheck`: Comando que verifica si el cluster está en estado "green" o "yellow" antes de permitir que otros servicios se conecten.
+- **`healthcheck`**: Ejecuta un comando `curl` cada 10 segundos. Si el cluster devuelve un estado `yellow` o `green`, el contenedor se marca como saludable. Esto es vital para que Kibana sepa cuándo conectarse.
     
 
-### 3.2 Servicio: Kibana
+### **Servicio: Kibana**
 
-La interfaz gráfica para el analista.
+Interfaz visual para la interacción con los datos y la gestión del SIEM.
 
-- `depends_on`: Asegura que Kibana no intente arrancar hasta que Elasticsearch esté saludable.
+- **`depends_on.es01.condition: service_healthy`**: Directiva fundamental que impide que Kibana intente arrancar antes de que la base de datos esté lista para recibir peticiones.
     
-- `environment`:
+- **`environment`**:
     
-    - `ELASTICSEARCH_HOSTS`: Dirección interna de la base de datos.
+    - **`ELASTICSEARCH_HOSTS=http://es01:9200`**: Apunta al servicio interno de base de datos.
         
-    - `ELASTICSEARCH_USERNAME`: Usuario técnico `kibana_system`.
+    - **`ELASTICSEARCH_USERNAME=kibana_system`**: Define el usuario de sistema necesario para la comunicación técnica.
         
-    - `SERVER_PUBLICBASEURL`: Define la URL de acceso local.
+    - **`XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY`**: Llave de 32 caracteres necesaria para cifrar objetos guardados (como dashboards o credenciales) en la base de datos interna.
         
-    - `XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY`: Llave para cifrar la base de datos de objetos de Kibana.
-        
-- `ports`: Expone el puerto `5601` para el acceso web.
+- **`ports: "5601:5601"`**: Mapea el puerto del contenedor al puerto local para acceso web vía navegador.
     
 
-### 3.3 Servicio: Filebeat
+### **Servicio: Filebeat**
 
-El recolector de logs que "lee" los datasets.
+Agente ligero encargado de recolectar y enviar logs.
 
-- `user: root`: Necesario para tener permisos de lectura sobre los archivos montados.
+- **`user: root`**: Ejecuta el proceso con privilegios máximos para asegurar la lectura de cualquier log montado desde el host.
     
-- `command: ["-e", "--strict.perms=false"]`: Envía logs a la consola y relaja la verificación de permisos de archivos en Windows/WSL.
+- **`command: ["-e", "--strict.perms=false"]`**:
     
-- `volumes`: Monta el archivo de configuración y la carpeta de logs en modo **Solo Lectura (`:ro`)**.
+    - `-e`: Envía la salida de logs a la consola de Docker.
+        
+    - `--strict.perms=false`: Ignora la verificación estricta de permisos en el archivo de configuración (necesario cuando se trabaja con sistemas de archivos montados desde Windows/WSL).
+        
+- **`volumes`**: Monta el archivo `filebeat.yml` y la carpeta `datasets` en modo Solo Lectura (`:ro`) para proteger la integridad de los logs crudos.
     
 
 ---
 
 ## 4. Desglose Técnico: filebeat.yml
 
-### 4.1 Inputs (Fuentes de Datos)
+Este archivo define la lógica de ingesta y normalización:
 
-Cada bloque define un origen de datos distinto:
+### **Sección: Inputs (Entradas de Datos)**
 
-- `type: filestream`: Método moderno para leer archivos línea por línea.
+Cada bloque define un `id` único para evitar colisiones en los metadatos de Filebeat.
+
+- **`type: filestream`**: Es el input moderno que reemplaza al antiguo `log`. Permite un mejor manejo de la rotación de archivos y el estado de lectura.
     
-- `paths`: Ubicación exacta de los logs (ej. `/datasets/aws/cloudtrail/*.log`).
+- **`paths`**: Utiliza comodines (`*.log`, `*.json`) para monitorizar dinámicamente nuevos archivos en los subdirectorios.
     
-- `fields`: Agrega metadatos (etiquetas) como `platform: "aws"`. Esto es vital para que el analista sepa de dónde viene el log sin abrirlo.
+- **`parsers.ndjson`**:
     
-- `ignore_older: 0s`: Instruye a Filebeat a procesar todos los archivos, sin importar su antigüedad.
+    - **`target: ""`**: Indica que el JSON debe parsearse en la raíz del documento de Elastic, no dentro de un campo anidado.
+        
+    - **`overwrite_keys: true`**: Si hay campos duplicados en el JSON original, los valores del log prevalecen sobre los de Filebeat.
+        
+- **`fields`**: Añade etiquetas personalizadas (`log_type`, `platform`). Esto es crítico en CTH para filtrar rápidamente por origen de datos sin necesidad de realizar búsquedas de texto completo pesadas.
+    
+- **`ignore_older: 0s`**: Obliga a Filebeat a leer todos los archivos del directorio, sin importar cuándo fueron creados o modificados por última vez.
     
 
-### 4.2 Output y Procesadores
+### **Sección: Output y Procesadores**
 
-- `output.elasticsearch`: Define a dónde se envían los datos procesados (User/Pass de Elastic).
+- **`output.elasticsearch`**: Configura el destino de los datos procesados, incluyendo las credenciales de acceso.
     
-- `setup.kibana`: Configuración para que Filebeat pueda crear automáticamente sus propios dashboards en Kibana.
+- **`processors`**:
     
-- `processors`: Añaden metadatos automáticos del host, Docker y la nube (Cloud) para enriquecer la investigación forense.
+    - **`add_host_metadata`**: Registra nombre de host, IP y OS del recolector.
+        
+    - **`add_cloud_metadata`**: Detecta automáticamente si el agente corre en una instancia de AWS/Azure/GCP.
+        
+    - **`add_docker_metadata`**: Añade ID del contenedor e imagen, fundamental para depurar fallos en el lab.
     
 
 ---
