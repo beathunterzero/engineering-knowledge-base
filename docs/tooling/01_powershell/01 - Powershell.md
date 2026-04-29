@@ -1,73 +1,140 @@
 ## 1. ¿Qué es PowerShell?
 
-**PowerShell** es una solución de automatización de tareas multiplataforma que consiste en un shell de línea de comandos, un lenguaje de scripting y un marco de gestión de configuración. A diferencia de los shells tradicionales (como Bash o CMD) que procesan texto, PowerShell se basa en el framework **.NET** y procesa **objetos**, lo que permite una manipulación de datos mucho más robusta y estructurada.
+PowerShell es una plataforma de automatización de tareas multiplataforma que incluye un shell de línea de comandos, un lenguaje de scripting y un framework de gestión de configuración.
 
-### 1.1 Diferencias Críticas de Versión
+A diferencia de shells tradicionales como Bash o CMD, que procesan texto plano, PowerShell se basa en el framework .NET y trabaja con objetos. Esto permite una manipulación de datos más estructurada, precisa y reutilizable, especialmente en contextos de administración de sistemas, automatización y análisis.
 
-Es fundamental distinguir entre las dos ramas principales de PowerShell para asegurar la compatibilidad de scripts y módulos:
+---
 
-|**Característica**|**Windows PowerShell**|**PowerShell (Core)**|
-|---|---|---|
-|**Versión**|5.1|7.x (Actual)|
-|**Base**|.NET Framework|.NET 6+ (Open Source)|
-|**Plataforma**|Solo Windows|Windows, Linux, macOS|
-|**Estado**|Mantenimiento (Legacy)|Desarrollo Activo (Recomendado)|
-|**Uso Ideal**|Administración de SO antiguo|**DevOps, CTH, Cloud y Multiplataforma**|
+### 1.1 Diferencias críticas de versión
 
-## 2. Anatomía de los Cmdlets
+Es importante distinguir entre las dos ramas principales de PowerShell para garantizar compatibilidad en scripts y módulos:
 
-Los comandos nativos de PowerShell se denominan **cmdlets**. Su sintaxis está diseñada para ser intuitiva y predecible, utilizando una estructura de **Verbo-Sustantivo**.
+Windows PowerShell
 
-- **Verbos comunes:** `Get` (recuperar), `Set` (establecer), `New` (crear), `Remove` (eliminar), `Start`/`Stop`.
+- Versión: 5.1
     
-- **Sustantivos:** Indican el recurso sobre el que se actúa (`Process`, `Service`, `Item`, `Content`).
+- Base: .NET Framework
+    
+- Plataforma: Solo Windows
+    
+- Estado: Mantenimiento (legacy)
+    
+- Uso recomendado: Compatibilidad con sistemas antiguos
     
 
-## 3. Comandos Esenciales de Navegación y Gestión
+PowerShell (Core)
 
-Para un flujo de trabajo eficiente en la terminal, estos son los cmdlets fundamentales y sus alias (compatibles con Linux):
-
-|**Cmdlet**|**Alias**|**Propósito Técnico**|
-|---|---|---|
-|`Get-ChildItem`|`ls` / `dir`|Lista archivos y directorios con sus propiedades.|
-|`Set-Location`|`cd`|Cambia el contexto del directorio actual.|
-|`Copy-Item`|`cp`|Duplica archivos o carpetas.|
-|`Remove-Item`|`rm` / `del`|Elimina elementos (usar `-Recurse` para carpetas).|
-|`Move-Item`|`mv`|Mueve o renombra archivos/directorios.|
-
-## 4. Herramientas de Auto-Documentación
-
-PowerShell incluye un sistema de ayuda integrado que es vital cuando se trabaja con módulos desconocidos:
-
-- **`Get-Help <Comando>`:** Muestra la sintaxis, descripción y parámetros de un comando. (Ej: `Get-Help Get-Process -Examples`).
+- Versión: 7.x (actual)
     
-- **`Get-Command`:** Permite buscar comandos disponibles en el sistema. Útil para descubrir funciones de módulos recién instalados (como AWS o Azure CLI).
+- Base: .NET 6+ (open source)
     
-- **`Get-Member` (GM):** El comando más potente para analistas; muestra todas las propiedades y métodos de un objeto.
+- Plataforma: Windows, Linux, macOS
     
-    - _Ejemplo:_ `Get-Process | Get-Member`
-        
-
-## 5. El Pipeline (`|`)
-
-En PowerShell, el pipeline no solo pasa texto, pasa el **objeto completo**. Esto permite filtrar y seleccionar datos sin necesidad de usar herramientas complejas de procesamiento de texto como `sed` o `awk`.
-
-- _Ejemplo de CTH:_ `Get-Process | Where-Object { $_.CPU -gt 100 }` (Filtra procesos con alto consumo de CPU).
+- Estado: Desarrollo activo
     
+- Uso recomendado: DevOps, Cloud, Threat Hunting y entornos multiplataforma
+    
+
+---
+
+## 2. Anatomía de los cmdlets
+
+Los comandos nativos de PowerShell se denominan cmdlets. Siguen una convención de nomenclatura basada en la estructura Verbo-Sustantivo, lo que facilita su comprensión y descubrimiento.
+
+Verbos comunes:  
+Get (recuperar), Set (establecer), New (crear), Remove (eliminar), Start / Stop
+
+Sustantivos:  
+Representan el recurso sobre el que se opera, por ejemplo: Process, Service, Item, Content
+
+Esta estructura permite inferir funcionalidad sin necesidad de memorizar comandos completos.
+
+---
+
+## 3. Comandos esenciales de navegación y gestión
+
+Cmdlets fundamentales para operar en el sistema de archivos:
+
+Get-ChildItem (alias: ls / dir)
+
+- Lista archivos y directorios junto con sus propiedades
+    
+
+Set-Location (alias: cd)
+
+- Cambia el directorio de trabajo actual
+    
+
+Copy-Item (alias: cp)
+
+- Copia archivos o directorios
+    
+
+Remove-Item (alias: rm / del)
+
+- Elimina archivos o directorios (usar -Recurse para eliminar carpetas)
+    
+
+Move-Item (alias: mv)
+
+- Mueve o renombra archivos y directorios
+    
+
+---
+
+## 4. Herramientas de auto-documentación
+
+PowerShell incluye mecanismos integrados para exploración y aprendizaje de comandos:
+
+Get-Help
+
+- Muestra sintaxis, descripción y parámetros
+    
+- Ejemplo: Get-Help Get-Process -Examples
+    
+
+Get-Command
+
+- Lista comandos disponibles en el sistema
+    
+- Útil para descubrir funcionalidades de módulos instalados
+    
+
+Get-Member (alias: gm)
+
+- Muestra propiedades y métodos de los objetos
+    
+- Es clave para análisis y comprensión del output
+    
+
+Ejemplo:  
+Get-Process | Get-Member
+
+---
+
+## 5. El pipeline (|)
+
+En PowerShell, el pipeline transfiere objetos completos entre cmdlets, no solo texto. Esto permite aplicar filtros y transformaciones directamente sobre estructuras de datos sin depender de herramientas externas como sed o awk.
+
+Ejemplo orientado a análisis:  
+Get-Process | Where-Object { $_.CPU -gt 100 }
+
+Este comando filtra procesos con alto consumo de CPU utilizando propiedades del objeto.
 
 ---
 
 ### Referencias Externas
 
-- [Microsoft Learn: PowerShell Documentation](https://learn.microsoft.com/en-us/powershell/scripting/overview)
-    
-- [PowerShell GitHub Repository](https://github.com/PowerShell/PowerShell)
-    
+[https://learn.microsoft.com/en-us/powershell/scripting/overview](https://learn.microsoft.com/en-us/powershell/scripting/overview)  
+[https://github.com/PowerShell/PowerShell](https://github.com/PowerShell/PowerShell)
+
+---
 
 ### Documentación Relacionada
 
-[[02 - Alias en Powershell]]
-[[03 - AWS CLI]]
-[[04 - Azure CLI]]
-[[01 - WSL]]
+[[02 - Alias en Powershell]]  
+[[03 - AWS CLI]]  
+[[04 - Azure CLI]]  
+[[01 - WSL]]  
 [[01 - Git]]

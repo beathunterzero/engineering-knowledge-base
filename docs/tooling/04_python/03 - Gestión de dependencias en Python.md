@@ -1,92 +1,142 @@
-## 1. El Rol de PIP y los Entornos Virtuales
+## 1. Rol de pip y entornos virtuales
 
-**PIP** (_Package Installer for Python_) es el gestor de paquetes estándar. Su función es descargar e instalar librerías externas. Para evitar conflictos entre proyectos (ej. un script que requiere `requests v2.0` y otro `v2.31`), se utilizan los **Entornos Virtuales (.venv)**.
+pip es el gestor de paquetes de Python utilizado para instalar librerías externas.
 
-## 2. Flujo Operativo Correcto
+Para evitar conflictos entre proyectos, se utilizan entornos virtuales (.venv), que aíslan dependencias y versiones de cada proyecto.
 
-El error más común es intentar gestionar la carpeta `.venv` manualmente. Esta carpeta es de uso exclusivo del intérprete de Python; el analista interactúa con ella a través de la **activación**.
+---
 
-### 2.1 Activación y Contexto
+## 2. Flujo operativo
 
-No se debe entrar a la carpeta `.venv`. El comando se ejecuta desde la **raíz del proyecto**:
+El entorno virtual no debe manipularse directamente. La interacción se realiza mediante su activación desde la raíz del proyecto.
 
-Bash
+---
+
+### 2.1 Activación del entorno
 
 ```bash
-# 1. Navegar al proyecto
 cd ~/mi_proyecto
-
-# 2. Activar el entorno (En WSL/Linux)
 source .venv/bin/activate
-
-# 3. Validar activación (El prompt cambia)
-# (.venv) rhodyn@beathunterzero:~/mi_proyecto$
 ```
 
-Una vez activado, los comandos `python` y `pip` apuntan automáticamente a los binarios dentro de `.venv`, aislando cualquier instalación del sistema global.
+Indicador de activación
 
-## 3. Gestión de Requerimientos (`requirements.txt`)
-
-Este archivo es el manifiesto de dependencias del proyecto. Permite que cualquier otro analista (o tú mismo en otra máquina) replique el entorno exacto.
-
-- **Exportar estado actual:** Registra todas las librerías instaladas y sus versiones.
-    
-    `pip freeze > requirements.txt`
-    
-- **Instalación masiva:** Reconstruye el entorno basado en el manifiesto.
-    
-    `pip install -r requirements.txt`
-    
-- **Actualización:** Tras actualizar un paquete, es mandatorio regenerar el archivo.
-    
-    `pip install --upgrade nombre_paquete && pip freeze > requirements.txt`
+- El prompt muestra el prefijo (.venv)
     
 
-## 4. Versionado Semántico
+Una vez activo:
 
-Las versiones en Python siguen el formato **MAJOR.MINOR.PATCH** (ej. `2.31.0`):
-
-1. **MAJOR (2):** Cambios que rompen la compatibilidad (requiere revisión de código).
+- python y pip apuntan al entorno local
     
-2. **MINOR (31):** Nuevas funcionalidades (retrocompatible).
-    
-3. **PATCH (0):** Correcciones de errores y seguridad.
-    
-
-> **Regla de Seguridad:** Evitar versiones flotantes (ej. `requests>=2.0`). Es preferible "congelar" la versión exacta (`requests==2.31.0`) para evitar que una actualización automática rompa un script de CTH crítico.
-
-## 5. Recuperación: Regenerar Entorno desde Cero
-
-Si el entorno virtual se corrompe o presenta comportamientos erráticos, la solución más eficiente es eliminarlo y reconstruirlo:
-
-Bash
-
-```bash
-rm -rf .venv                      # Eliminar carpeta corrupta
-python3.12 -m venv .venv          # Crear nuevo entorno limpio
-source .venv/bin/activate         # Activar
-pip install -r requirements.txt   # Reinstalar dependencias exactas
-```
-
-## 6. Buenas Prácticas
-
-- **Aislamiento Total:** Nunca uses `sudo pip install`. Las instalaciones globales ensucian el sistema operativo.
-    
-- **Higiene de Manifiesto:** Mantén solo las dependencias estrictamente necesarias para reducir la superficie de ataque y el peso del proyecto.
-    
-- **Documentación:** Asegúrate de que el `README.md` indique la versión de Python recomendada para el entorno.
+- Las instalaciones no afectan al sistema global
     
 
 ---
 
-### Referencias Externas
+## 3. Gestión de dependencias (requirements.txt)
 
-- [Python.org: Installing Packages using pip and venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
+Archivo que define las dependencias del proyecto.
+
+---
+
+Exportar dependencias actuales
+
+```bash
+pip freeze > requirements.txt
+```
+
+---
+
+Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+Actualizar dependencias
+
+```bash
+pip install --upgrade nombre_paquete
+pip freeze > requirements.txt
+```
+
+---
+
+## 4. Versionado
+
+Formato: MAJOR.MINOR.PATCH
+
+MAJOR
+
+- Cambios incompatibles
     
-- [Semantic Versioning 2.0.0 Standard](https://semver.org/)
+
+MINOR
+
+- Nuevas funcionalidades compatibles
     
 
-### Documentación Relacionada
+PATCH
 
-[[01 - Python para WSL]]
+- Correcciones de errores
+    
+
+Recomendación
+
+- Usar versiones fijas (ej. paquete==2.31.0)
+    
+- Evitar versiones abiertas (ej. paquete>=2.0)
+    
+
+---
+
+## 5. Recuperación del entorno
+
+Si el entorno presenta errores, se recomienda reconstruirlo.
+
+```bash
+rm -rf .venv
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
+## 6. Buenas prácticas
+
+Aislamiento
+
+- No usar instalaciones globales
+    
+
+Uso de privilegios
+
+- Evitar sudo pip install
+    
+
+Control de dependencias
+
+- Mantener solo librerías necesarias
+    
+
+Documentación
+
+- Especificar versión de Python en README.md
+    
+
+---
+
+### Referencias externas
+
+[https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)  
+[https://semver.org/](https://semver.org/)
+
+---
+
+### Documentación relacionada
+
+[[01 - Python para WSL]]  
 [[04 - Automatización y scripting en Python]]

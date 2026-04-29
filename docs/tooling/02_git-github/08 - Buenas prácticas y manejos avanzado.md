@@ -1,113 +1,174 @@
-## 1. Gestión Inteligente con `.gitignore`
+## 1. Gestión inteligente con .gitignore
 
-El archivo `.gitignore` es la primera línea de defensa para mantener un repositorio limpio, profesional y seguro. Su función es evitar que archivos temporales, binarios o sensibles se integren al historial de versiones.
+El archivo .gitignore permite definir qué archivos no deben ser rastreados por Git. Su correcta configuración evita la inclusión de datos innecesarios o sensibles en el repositorio.
 
-### 1.1 Estándares de Exclusión
+---
 
-Existen categorías de archivos que, por norma general, **nunca** deben ser rastreados:
+### 1.1 Estándares de exclusión
 
-|**Categoría**|**Ejemplos**|**Razón**|
-|---|---|---|
-|**Dependencias**|`.venv/`, `node_modules/`|Pesados y regenerables mediante archivos de requisitos.|
-|**Secretos**|`*.env`, `*.pem`, `*.key`|Riesgo crítico de seguridad (fuga de credenciales).|
-|**Compilados**|`__pycache__/`, `*.pyc`, `*.exe`|Específicos de la arquitectura/máquina local.|
-|**Sistema**|`.DS_Store`, `Thumbs.db`|Ruido visual generado por el SO (macOS/Windows).|
+Dependencias
 
-### 1.2 Configuración Global (User Level)
+- .venv/
+    
+- node_modules/  
+    Motivo: Son pesadas y pueden regenerarse
+    
 
-Para no repetir las mismas exclusiones en cada proyecto (como los archivos del sistema), se recomienda un `.gitignore` global en tu entorno WSL:
+Secretos
 
-Bash
+- *.env
+    
+- *.pem
+    
+- *.key  
+    Motivo: Riesgo de exposición de credenciales
+    
+
+Archivos compilados
+
+- **pycache**/
+    
+- *.pyc
+    
+- *.exe  
+    Motivo: Dependientes del entorno local
+    
+
+Archivos del sistema
+
+- .DS_Store
+    
+- Thumbs.db  
+    Motivo: Generados automáticamente por el sistema operativo
+    
+
+---
+
+### 1.2 Configuración global
+
+Permite aplicar reglas comunes a todos los repositorios.
 
 ```bash
-# Definir el archivo global
 git config --global core.excludesfile ~/.gitignore_global
-
-# Editar y agregar reglas comunes (ej. Thumbs.db, *.log)
 nano ~/.gitignore_global
 ```
 
-## 2. Reglas de Oro del Control de Versiones
+---
 
-1. **Atentado a la seguridad:** Nunca subir `.env`, claves SSH o tokens de API.
-    
-2. **Higiene del repositorio:** El `.gitignore` debe crearse **antes** del primer commit.
-    
-3. **Flujo preventivo:** Siempre ejecutar `git status` antes de un commit y `git pull` antes de un `push` para evitar conflictos.
-    
-4. **Atómica y Descriptiva:** Commits pequeños y con mensajes que expliquen el "porqué", no solo el "qué".
+## 2. Reglas de control de versiones
+
+Seguridad
+
+- No subir archivos con credenciales o claves
     
 
-## 3. Operaciones de Limpieza y Control de Rastreo
+Inicialización
 
-### 3.1 Desvincular archivos ya subidos
+- Crear .gitignore antes del primer commit
+    
 
-Si accidentalmente subiste un archivo que debería estar ignorado (ej. un log), usa el siguiente comando para borrarlo del repositorio pero **mantenerlo** en tu disco local:
+Validación
 
-Bash
+- Ejecutar git status antes de cada commit
+    
+- Ejecutar git pull antes de push
+    
+
+Commits
+
+- Mantener commits pequeños
+    
+- Usar mensajes descriptivos orientados al propósito
+    
+
+---
+
+## 3. Limpieza y control de rastreo
+
+---
+
+### 3.1 Eliminar archivos del repositorio sin borrarlos localmente
 
 ```bash
 git rm --cached <archivo>
-# Luego, asegúrate de añadirlo al .gitignore
 ```
 
-### 3.2 Ignorar cambios en archivos rastreados (Skip-Worktree)
+Luego agregar el archivo al .gitignore.
 
-Útil para archivos de configuración local que Git ya conoce pero que no quieres que tus cambios personales se suban al repo:
+---
 
-- **Ignorar localmente:** `git update-index --skip-worktree <archivo>`
-    
-- **Revertir ignorado:** `git update-index --no-skip-worktree <archivo>`
-    
+### 3.2 Ignorar cambios en archivos rastreados
 
-## 4. Comandos Avanzados de Recuperación y Visualización
+```bash
+git update-index --skip-worktree <archivo>
+git update-index --no-skip-worktree <archivo>
+```
 
-### 4.1 Visualización del Historial
+---
 
-Para ver el flujo de ramas y commits de forma compacta y visual:
+## 4. Comandos avanzados
 
-Bash
+---
+
+### 4.1 Visualización de historial
 
 ```bash
 git log --oneline --graph --decorate --all
 ```
 
-### 4.2 Deshacer Cambios (Resets y Reverts)
+---
 
-- **Revert (Seguro):** Crea un nuevo commit que deshace los cambios de uno anterior. Ideal para repositorios compartidos.
-    
-    `git revert <hash_del_commit>`
-    
-- **Reset Soft:** Deshace el commit pero mantiene tus cambios en el _staging area_ (listos para volver a commitear).
-    
-    `git reset --soft HEAD~1`
-    
-- **Reset Hard (Peligroso):** Borra permanentemente el commit y todos los cambios realizados en los archivos.
-    
-    `git reset --hard HEAD~1`
+### 4.2 Deshacer cambios
+
+Revert
+
+- Crea un commit que revierte cambios
     
 
-### 4.3 El "Bolsillo" Temporal: Git Stash
+```bash
+git revert <hash_del_commit>
+```
 
-Cuando necesitas cambiar de rama o hacer un pull urgente pero no quieres perder (ni commitear) tu trabajo actual:
+Reset soft
 
-- **Guardar:** `git stash` (mueve tus cambios a una pila temporal).
+- Mantiene cambios en staging
     
-- **Recuperar:** `git stash pop` (trae los cambios de vuelta y los borra de la pila).
+
+```bash
+git reset --soft HEAD~1
+```
+
+Reset hard
+
+- Elimina cambios de forma permanente
     
+
+```bash
+git reset --hard HEAD~1
+```
 
 ---
 
-### Referencias Externas
+### 4.3 Uso de git stash
 
-- [Git Documentation: Undoing Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things)
-    
-- [GitHub: A collection of useful .gitignore templates](https://github.com/github/gitignore)
-    
-- [Atlassian Git Tutorial: Git Reset vs Revert](https://www.atlassian.com/git/tutorials/undoing-changes/git-reset)
-    
+```bash
+git stash
+git stash pop
+```
 
-### Documentación Relacionada
+Permite guardar cambios temporalmente sin hacer commit.
 
-[[01 - Git]]
+---
+
+### Referencias externas
+
+[https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things)  
+[https://github.com/github/gitignore](https://github.com/github/gitignore)  
+[https://www.atlassian.com/git/tutorials/undoing-changes/git-reset](https://www.atlassian.com/git/tutorials/undoing-changes/git-reset)
+
+---
+
+### Documentación relacionada
+
+[[01 - Git]]  
 [[02 - GitHub]]

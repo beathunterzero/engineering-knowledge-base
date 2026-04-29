@@ -1,75 +1,112 @@
-## 1. Definición y Propósito
+## 1. Definición y propósito
 
-La **Azure CLI** es una herramienta de comandos multiplataforma para conectarse a Azure y ejecutar comandos administrativos sobre los recursos de Azure. Para un perfil de **Incident Response** y **Cloud Security**, esta herramienta es indispensable para auditar configuraciones de red, gestionar identidades y automatizar la respuesta ante alertas en entornos de nube de Microsoft.
+Azure CLI es una herramienta de línea de comandos multiplataforma diseñada para interactuar con servicios de Microsoft Azure y administrar recursos en la nube.
 
-## 2. Instalación y Verificación (Windows)
+Para perfiles de Incident Response y Cloud Security, permite:
 
-Al igual que con el resto de herramientas en tu entorno, el uso de `winget` garantiza una instalación limpia y fácil de actualizar.
+- Auditoría de configuraciones de red
+    
+- Gestión de identidades y recursos
+    
+- Automatización de tareas operativas y respuesta ante incidentes
+    
 
-PowerShell
+---
+
+## 2. Instalación y verificación (Windows)
+
+El método recomendado en Windows es el uso de winget.
 
 ```powershell
-# 1. Instalación mediante gestor de paquetes
+# Instalación
 winget install Microsoft.AzureCLI
 
-# 2. Verificar versión y componentes instalados
+# Verificación
 az --version
 ```
 
-## 3. Flujo de Autenticación y Contexto
+---
 
-Azure CLI utiliza un flujo de autenticación basado en navegador por defecto, lo que facilita el inicio de sesión seguro.
+## 3. Flujo de autenticación y contexto
 
-- **Login:** Abre una ventana del navegador para autenticarte.
-    
-    `az login`
-    
-- **Logout:** Elimina el token de acceso local. **Recomendado en entornos compartidos.**
-    
-    `az logout`
-    
+Azure CLI utiliza autenticación basada en navegador por defecto.
 
-### 3.1 Gestión de Suscripciones
+Login:  
+az login
 
-En entornos profesionales con múltiples suscripciones, es crítico validar en qué contexto se están ejecutando los comandos para evitar cambios accidentales en producción.
+Logout:  
+az logout
 
-PowerShell
+Se recomienda cerrar sesión en entornos compartidos para evitar exposición de tokens.
+
+---
+
+### 3.1 Gestión de suscripciones
+
+En entornos con múltiples suscripciones, es necesario validar el contexto activo antes de ejecutar comandos.
 
 ```powershell
-# Listado de suscripciones disponibles
+# Listar suscripciones
 az account list --output table
 
-# Seleccionar suscripción de trabajo (por Nombre o ID)
+# Seleccionar suscripción
 az account set --subscription "<ID-de-Suscripción>"
 ```
 
-## 4. Comandos de Gestión y Auditoría
+---
 
-Operaciones de consulta rápida sobre la infraestructura desplegada:
+## 4. Comandos de gestión y auditoría
 
-|**Recurso**|**Comando**|**Utilidad Técnica**|
-|---|---|---|
-|**VM**|`az vm list`|Inventariado de activos y estado de máquinas virtuales.|
-|**Resources**|`az resource list`|Vista global de todos los recursos del tenant.|
-|**Groups**|`az group list`|Auditoría de contenedores lógicos de recursos.|
-|**Creación**|`az group create`|Despliegue rápido de grupos (ej. para laboratorios aislados).|
+Consultas frecuentes sobre infraestructura:
 
-### 4.1 Formatos de Salida (`--output`)
+VM  
+az vm list
 
-Azure CLI ofrece flexibilidad para la visualización o procesamiento de datos:
-
-- **`table`:** Formato preferido para inspección visual rápida.
-    
-- **`json`:** Estándar para integración con otros scripts.
-    
-- **`yaml`:** Útil para configuraciones complejas y legibilidad de archivos.
+- Inventario de máquinas virtuales
     
 
-## 5. Optimización mediante Alias en PowerShell
+Resources  
+az resource list
 
-Integra estos alias en tu `$PROFILE` para acelerar la respuesta ante incidentes:
+- Vista global de recursos
+    
 
-PowerShell
+Groups  
+az group list
+
+- Listado de grupos de recursos
+    
+
+Creación  
+az group create
+
+- Creación de grupos de recursos
+    
+
+---
+
+### 4.1 Formatos de salida (--output)
+
+table
+
+- Recomendado para inspección visual
+    
+
+json
+
+- Útil para automatización e integración
+    
+
+yaml
+
+- Adecuado para configuraciones estructuradas
+    
+
+---
+
+## 5. Optimización mediante alias en PowerShell
+
+Ejemplo de alias para agilizar operaciones:
 
 ```powershell
 Set-Alias azlogin "az login"
@@ -77,27 +114,40 @@ Set-Alias azvm "az vm list --output table"
 Set-Alias azres "az resource list --output table"
 ```
 
-## 6. Buenas Prácticas y Seguridad
+---
 
-- **Precisión del Contexto:** Siempre verifica la suscripción activa con `az account show` antes de ejecutar comandos de modificación o borrado.
+## 6. Buenas prácticas de seguridad
+
+Validación de contexto
+
+- Verificar suscripción activa con az account show antes de ejecutar cambios
     
-- **Higiene de Sesión:** Ejecuta `az logout` al finalizar tareas en máquinas que no sean de tu propiedad exclusiva.
+
+Higiene de sesión
+
+- Ejecutar az logout en entornos compartidos
     
-- **Manejo de Secretos:** No incluyas comandos que contengan contraseñas o secretos en el historial de PowerShell (puedes usar variables interactivas).
+
+Gestión de secretos
+
+- Evitar exponer credenciales en historial o scripts
     
-- **Uso de Tablas:** Utiliza `--output table` por defecto para minimizar errores de interpretación visual al leer grandes volúmenes de datos.
+
+Consistencia en salida
+
+- Usar --output table para reducir errores de interpretación
     
 
 ---
 
-### Referencias Externas
+### Referencias externas
 
-- [Microsoft Learn: Get started with Azure CLI](https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli)
-    
-- [Azure CLI Command Reference](https://learn.microsoft.com/en-us/cli/azure/reference-index)
-    
+[https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli](https://learn.microsoft.com/en-us/cli/azure/get-started-with-azure-cli)  
+[https://learn.microsoft.com/en-us/cli/azure/reference-index](https://learn.microsoft.com/en-us/cli/azure/reference-index)
 
-### Documentación Relacionada
+---
 
-[[01 - Powershell]]
+### Documentación relacionada
+
+[[01 - Powershell]]  
 [[03 - AWS CLI]]

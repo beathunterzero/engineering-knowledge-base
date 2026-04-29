@@ -1,101 +1,165 @@
-## 1. Definición y Propósito
+## 1. Definición y propósito
 
-**Docker Compose** es una herramienta diseñada para definir y gestionar aplicaciones multi-contenedor. Permite orquestar de manera declarativa servicios, redes y volúmenes en un único archivo de configuración, facilitando la replicación de entornos completos con un solo comando.
+Docker Compose permite definir y gestionar aplicaciones que utilizan múltiples contenedores.
 
-- **Función Principal:** Orquestador local para describir la interacción entre múltiples servicios.
+Se basa en un archivo declarativo que describe servicios, redes y volúmenes.
+
+Archivo utilizado
+
+- docker-compose.yml
     
-- **Archivo de Configuración:** Utiliza el formato **YAML** (`docker-compose.yml`), el cual destaca por ser legible y estructurado mediante indentación.
-    
-
-## 2. Estructura del Archivo YAML
-
-Un archivo `docker-compose.yml` se organiza en secciones clave que definen el estado deseado de la aplicación:
-
-|**Directiva**|**Descripción**|
-|---|---|
-|**version**|Versión del formato de Compose (ej. "3.9").|
-|**services**|Bloque donde se definen los contenedores (servicios).|
-|**image / build**|Define si se usa una imagen existente o se construye desde un `Dockerfile`.|
-|**ports**|Mapeo de puertos entre el host y el contenedor (`HOST:CONTAINER`).|
-|**volumes**|Configuración de persistencia de datos y montajes.|
-|**depends_on**|Establece el orden de inicio (ej. la web espera a la base de datos).|
-|**restart**|Define la política de reinicio ante fallos o detenciones.|
-
-## 3. Gestión del Ciclo de Vida (CLI)
-
-Comandos esenciales para administrar el stack definido en el archivo Compose:
-
-### 3.1 Despliegue y Control
-
-- **Levantar Entorno:** Crea y arranca todos los servicios.
-    
-    - `docker compose up` (Usa `-d` para segundo plano/detach).
-        
-    - `docker compose up --build` (Fuerza la reconstrucción de imágenes).
-        
-- **Estado de Servicios:** Lista los contenedores asociados al proyecto y su estado.
-    
-    - `docker compose ps`
-        
-- **Reiniciar:**
-    
-    - `docker compose restart [servicio]`
-        
-
-### 3.2 Detención y Limpieza
-
-- **Parar Servicios:** Detiene los contenedores pero mantiene los recursos.
-    
-    - `docker compose stop`
-        
-- **Eliminación Total:** Detiene y elimina contenedores y redes creadas.
-    
-    - `docker compose down`
-        
-    - `docker compose down -v` (Elimina también los **volúmenes** persistentes).
-        
-    - `docker compose down --rmi all` (Elimina también las **imágenes** asociadas).
-        
-
-## 4. Diagnóstico e Interacción
-
-- **Monitoreo de Logs:**
-    
-    - `docker compose logs -f [servicio]` (Seguimiento en tiempo real).
-        
-- **Ejecución de Comandos:** Acceso directo a un servicio específico sin necesidad de usar el ID del contenedor.
-    
-    - `docker compose exec [servicio] bash`
-        
-
-## 5. Networking y Persistencia
-
-- **Red Automática:** Compose crea una red interna por defecto. Los servicios pueden comunicarse entre sí utilizando su **nombre de servicio** como hostname (ej. `http://db:3306`).
-    
-- **Volúmenes Nombrados:** Permiten que los datos sobrevivan a la eliminación del contenedor, declarándose en la raíz del archivo y asignándose dentro de cada servicio.
-    
-
-## 6. Políticas de Reinicio (Restart)
-
-|**Política**|**Descripción**|
-|---|---|
-|`no`|No reinicia automáticamente (por defecto).|
-|`always`|Reinicia siempre que el contenedor se detenga.|
-|`on-failure`|Reinicia solo si el contenedor falla (exit code distinto de 0).|
-|`unless-stopped`|Reinicia siempre, excepto si el usuario lo detuvo manualmente.|
 
 ---
 
-### Referencias Externas
+## 2. Estructura del archivo
 
-- [Docker Compose Specification](https://docs.docker.com/compose/compose-file/)
-    
-- [Overview of Docker Compose CLI](https://docs.docker.com/compose/reference/)
-    
-- [YAML Ain't Markup Language (Official Site)](https://yaml.org/)
+version
+
+- Define la versión del formato
     
 
-### Documentación Relacionada
+services
 
-[[01 - Conceptos fundamentales de Docker]]
+- Contiene la definición de los contenedores
+    
+
+image / build
+
+- Imagen a usar o proceso de construcción
+    
+
+ports
+
+- Mapeo de puertos
+    
+
+volumes
+
+- Persistencia de datos
+    
+
+depends_on
+
+- Orden de inicio de servicios
+    
+
+restart
+
+- Política de reinicio
+    
+
+---
+
+## 3. Gestión del ciclo de vida
+
+---
+
+### 3.1 Despliegue
+
+```bash
+docker compose up
+docker compose up -d
+docker compose up --build
+```
+
+---
+
+### 3.2 Estado
+
+```bash
+docker compose ps
+```
+
+---
+
+### 3.3 Reinicio
+
+```bash
+docker compose restart
+docker compose restart <servicio>
+```
+
+---
+
+## 4. Detención y limpieza
+
+```bash
+docker compose stop
+docker compose down
+docker compose down -v
+docker compose down --rmi all
+```
+
+---
+
+## 5. Diagnóstico
+
+Logs
+
+```bash
+docker compose logs -f
+docker compose logs -f <servicio>
+```
+
+Ejecución de comandos
+
+```bash
+docker compose exec <servicio> bash
+```
+
+---
+
+## 6. Networking y persistencia
+
+Red
+
+- Compose crea una red interna automáticamente
+    
+- Los servicios se comunican por nombre
+    
+
+Volúmenes
+
+- Permiten persistencia de datos
+    
+- Se definen en el archivo principal
+    
+
+---
+
+## 7. Políticas de reinicio
+
+no
+
+- Sin reinicio automático
+    
+
+always
+
+- Reinicio continuo
+    
+
+on-failure
+
+- Reinicio ante error
+    
+
+unless-stopped
+
+- Reinicio excepto detención manual
+    
+
+---
+
+### Referencias externas
+
+[https://docs.docker.com/compose/compose-file/](https://docs.docker.com/compose/compose-file/)  
+[https://docs.docker.com/compose/reference/](https://docs.docker.com/compose/reference/)  
+[https://yaml.org/](https://yaml.org/)
+
+---
+
+### Documentación relacionada
+
+[[01 - Conceptos fundamentales de Docker]]  
 [[05 - Buenas prácticas en Docker]]

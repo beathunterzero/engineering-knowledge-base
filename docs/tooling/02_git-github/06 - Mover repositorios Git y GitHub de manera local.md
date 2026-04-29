@@ -1,97 +1,136 @@
-## 1. Naturaleza Portátil de Git
+## 1. Naturaleza portátil de Git
 
-Una de las ventajas fundamentales de Git es que el repositorio es **autónomo**. Toda la base de datos de historial, ramas y configuraciones reside dentro del directorio oculto `.git`. Debido a que Git utiliza rutas relativas internamente, es posible mover la carpeta física del proyecto a cualquier ubicación del disco sin romper el control de versiones.
+Git es un sistema distribuido, lo que implica que cada repositorio contiene toda la información necesaria para su funcionamiento dentro del directorio oculto .git.
 
-## 2. Procedimiento de Migración Física
+Debido a que Git trabaja con rutas relativas, es posible mover un repositorio dentro del sistema de archivos sin afectar su integridad, siempre que se conserve la estructura completa.
 
-Para mover un repositorio de un directorio a otro (ej. de `/home/rhodyn/temp` a `/home/rhodyn/projects/carnada`), sigue estos pasos:
+---
 
-1. **Cierre de Procesos:** Asegúrate de que VS Code, terminales o cualquier servicio (como Docker o servidores locales) que utilicen archivos del repo estén cerrados para evitar bloqueos de archivos.
+## 2. Procedimiento de migración física
+
+Para mover un repositorio entre directorios:
+
+1. Cierre de procesos
     
-2. **Traslado:** Mueve la carpeta completa. Es **crítico** asegurar que el directorio `.git` se mueva junto con los archivos de trabajo.
+
+- Asegurar que no existan editores, terminales o servicios utilizando archivos del repositorio
     
-3. **Acceso:** Abre una nueva terminal en la ubicación de destino.
+
+2. Traslado
     
 
-## 3. Verificación de Integridad Técnica
+- Mover la carpeta completa del proyecto
+    
+- Verificar que el directorio .git se incluya en el traslado
+    
 
-Una vez movido el repositorio, es necesario validar que Git sigue rastreando los archivos y que la conexión con el servidor remoto (GitHub) permanece operativa.
+3. Acceso
+    
 
-### 3.1 Validación del Estado Local
+- Abrir una nueva terminal en la ruta destino
+    
 
-Ejecuta el siguiente comando para confirmar que Git reconoce el contexto:
+---
 
-Bash
+## 3. Verificación de integridad técnica
+
+Después del movimiento, es necesario validar que el repositorio sigue operativo.
+
+---
+
+### 3.1 Validación del estado local
 
 ```bash
 git status
 ```
 
-- **Resultado esperado:** `On branch main / Your branch is up to date...`
+Resultado esperado
+
+- Confirmación de rama activa y sincronización
     
-- **Error común:** Si recibes `fatal: not a git repository`, significa que el directorio `.git` no se movió correctamente o estás en la ruta equivocada.
+
+Error común
+
+- fatal: not a git repository
+    
+- Indica ausencia del directorio .git o ubicación incorrecta
     
 
-### 3.2 Validación de la Conexión Remota
+---
 
-El puntero hacia GitHub se almacena en el archivo de configuración local del repo, por lo que no se pierde al mover la carpeta.
-
-Bash
+### 3.2 Validación de la conexión remota
 
 ```bash
 git remote -v
 ```
 
-- **Verificación:** Deberías ver las URLs de `fetch` y `push` (ya sean HTTPS o SSH) apuntando a tu repositorio en GitHub.
+Resultado esperado
+
+- URLs de fetch y push configuradas correctamente
     
 
-## 4. Test de Sincronización
+La configuración remota se mantiene al mover el repositorio.
 
-Para garantizar que el flujo de trabajo está al 100%, realiza una prueba de comunicación bidireccional:
+---
 
-1. **Test de Descarga (Pull):**
+## 4. Test de sincronización
+
+Se recomienda validar el flujo completo de comunicación.
+
+---
+
+### 4.1 Test de descarga
+
+```bash
+git pull
+```
+
+---
+
+### 4.2 Test de subida
+
+```bash
+echo "test" > test_movimiento.txt
+git add test_movimiento.txt
+git commit -m "chore: validación de integridad tras migración local"
+git push
+```
+
+---
+
+### 4.3 Limpieza
+
+Eliminar el archivo de prueba y sincronizar nuevamente.
+
+---
+
+## 5. Casos especiales en WSL
+
+Sistemas de archivos
+
+- Evitar mover repositorios entre /home y /mnt/c mediante herramientas gráficas
     
-    Bash
-    
-    ```bash
-    git pull
-    ```
-    
-2. **Test de Subida (Push):** Crea y envía un archivo efímero para validar permisos de escritura:
-    
-    Bash
-    
-    ```bash
-    echo "test" > test_movimiento.txt
-    git add test_movimiento.txt
-    git commit -m "chore: validación de integridad tras migración local"
-    git push
-    ```
-    
-3. **Limpieza:** Una vez confirmado el éxito del `push`, elimina el archivo de prueba y sincroniza de nuevo.
+- Puede afectar permisos y enlaces simbólicos
     
 
-## 5. Casos Especiales en WSL
+Rutas en scripts
 
-- **Entre Sistemas de Archivos:** Evita mover repositorios desde el sistema de archivos de Linux (`/home/ubuntu/...`) al de Windows (`/mnt/c/...`) mediante el explorador de archivos, ya que los permisos de Linux (`chmod`) y los enlaces simbólicos se perderán.
-    
-- **Rutas en Scripts:** Si tienes scripts de automatización que apuntan a la ruta antigua, recuerda actualizarlos con el nuevo path.
+- Actualizar paths si existen referencias a la ubicación anterior
     
 
 ---
 
-### Referencias Externas
+### Referencias externas
 
-- [Git FAQ: Moving a git repository to another directory](https://git-scm.com/docs/gitfaq)
-    
-- [StackOverflow: Is it safe to move a git repository?](https://www.google.com/search?q=https://stackoverflow.com/questions/2192728/is-it-safe-to-move-a-git-repository-folder)
-    
-- [Microsoft: Working with Git in WSL2](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-git)
-    
+[https://git-scm.com/docs/gitfaq](https://git-scm.com/docs/gitfaq)  
+[https://stackoverflow.com/questions/2192728/is-it-safe-to-move-a-git-repository-folder](https://stackoverflow.com/questions/2192728/is-it-safe-to-move-a-git-repository-folder)  
+[https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-git](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-git)
 
-### Documentación Relacionada
+---
 
-[[01 - Git]]
-[[02 - GitHub]]
-[[07 - Visibilidad de repositorios]]
+### Documentación relacionada
+
+[[01 - Git]]  
+[[02 - GitHub]]  
+[[07 - Visibilidad de repositorios]]  
 [[08 - Buenas prácticas y manejos avanzado]]

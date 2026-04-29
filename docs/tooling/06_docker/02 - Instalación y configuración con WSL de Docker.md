@@ -1,88 +1,130 @@
-## 1. Objetivo del Entorno
+## 1. Objetivo del entorno
 
-Configurar una arquitectura donde se utilice **Docker Engine** exclusivamente desde la terminal de **Ubuntu WSL2**, minimizando el consumo de recursos en Windows al prescindir de la interfaz gráfica (UI) y procesos secundarios innecesarios.
+Configurar Docker para ser utilizado desde Ubuntu en WSL2, evitando el uso constante de la interfaz gráfica de Docker Desktop y reduciendo el consumo de recursos en Windows.
 
-## 2. Instalación de Docker Desktop (Windows)
+---
 
-Durante el proceso de instalación, es crítico seleccionar los parámetros adecuados para garantizar la eficiencia técnica y evitar el "bloatware" de procesos automáticos.
+## 2. Instalación de Docker Desktop
 
-### 2.1 Configuración de Parámetros de Instalación
+Durante la instalación, es importante seleccionar opciones que prioricen rendimiento y simplicidad.
 
-|**Opción**|**Estado**|**Justificación Técnica**|
-|---|---|---|
-|**Use WSL 2 instead of Hyper-V**|✔️|Requerido para el motor de kernel Linux nativo.|
-|**Enable WSL Integration**|✔️|Permite que los binarios de Docker sean accesibles desde Ubuntu.|
-|**Add docker.internal names to hosts**|✔️|Facilita el networking entre contenedores y el host.|
-|**Use containerd for pulling images**|✔️|Implementa el runtime estándar más eficiente.|
-|**Start Docker Desktop when you sign in**|❌|**Crucial:** Evita el consumo de RAM/CPU al arrancar Windows.|
-|**Open Docker Dashboard when starts**|❌|Evita la carga de la interfaz gráfica.|
-|**Enable Scout / SBOM**|❌|Desactiva servicios de escaneo adicionales para ahorrar recursos.|
+---
 
-## 3. Configuración de Integración con WSL
+### 2.1 Parámetros recomendados
 
-Una vez instalado, se debe habilitar el puente de comunicación entre el motor de Windows y la distribución de Linux:
+Use WSL 2 instead of Hyper-V
 
-1. Abrir Docker Desktop temporalmente.
+- Habilitado
     
-2. Navegar a **Settings → Resources → WSL Integration**.
-    
-3. Activar el switch para la distribución **Ubuntu**.
-    
-4. Habilitar **"Enable integration with my default WSL distro"**.
-    
-5. **Cerrar completamente Docker Desktop.**
+- Requerido para usar kernel Linux real
     
 
-## 4. Verificación en Ubuntu WSL
+Enable WSL Integration
 
-Desde la terminal de Ubuntu, ejecutar los siguientes comandos para validar la disponibilidad del servicio:
+- Habilitado
+    
+- Permite usar Docker desde Ubuntu
+    
 
-Bash
+Add docker.internal names to hosts
+
+- Habilitado
+    
+- Mejora conectividad entre host y contenedores
+    
+
+Use containerd for pulling images
+
+- Habilitado
+    
+- Mejora eficiencia en manejo de imágenes
+    
+
+Start Docker Desktop when you sign in
+
+- Deshabilitado
+    
+- Evita consumo automático de recursos
+    
+
+Open Docker Dashboard when starts
+
+- Deshabilitado
+    
+- Evita carga de interfaz gráfica
+    
+
+Enable Scout / SBOM
+
+- Deshabilitado
+    
+- Reduce procesos adicionales
+    
+
+---
+
+## 3. Integración con WSL
+
+Pasos:
+
+1. Abrir Docker Desktop
+    
+2. Ir a Settings → Resources → WSL Integration
+    
+3. Activar integración con Ubuntu
+    
+4. Habilitar integración con distribución por defecto
+    
+5. Cerrar Docker Desktop
+    
+
+---
+
+## 4. Verificación en WSL
 
 ```bash
-# Verificar versiones de cliente y servidor
 docker --version
-
-# Consultar estado del daemon y recursos
 docker info
-
-# Prueba de ejecución (Hello World)
 docker run --rm hello-world
 ```
 
-## 5. Troubleshooting: Resolución de Errores Comunes
+Resultados esperados
 
-Si el entorno presenta fallos de conexión o permisos, aplicar las siguientes correcciones:
+- Cliente y servidor disponibles
+    
+- Ejecución correcta del contenedor de prueba
+    
 
-### 5.1 El daemon no responde o no inicia
+---
 
-Si Docker se queda bloqueado o no es detectado tras un reinicio:
+## 5. Resolución de problemas
 
-PowerShell
+---
+
+### 5.1 Reinicio del entorno
 
 ```powershell
-# Desde PowerShell como Administrador o usando tus alias:
 dockerstop
 wsl --shutdown
 dockerstart --background
 ```
 
-### 5.2 Error: "Cannot connect to the Docker daemon"
+---
 
-Suele deberse a que el usuario actual no pertenece al grupo de privilegios de Docker:
-
-Bash
+### 5.2 Error de conexión al daemon
 
 ```bash
 sudo usermod -aG docker $USER
-# Importante: Cerrar y volver a abrir la sesión de WSL para aplicar cambios.
 ```
 
-### 5.3 Error de permisos en el Socket (`/var/run/docker.sock`)
+Acción adicional
 
-Si recibes errores de "Permission Denied" al ejecutar comandos sin `sudo`:
+- Reiniciar sesión de WSL
+    
 
-Bash
+---
+
+### 5.3 Error de permisos en socket
 
 ```bash
 sudo chmod 666 /var/run/docker.sock
@@ -90,18 +132,36 @@ sudo chmod 666 /var/run/docker.sock
 
 ---
 
-### Referencias Externas
+## 6. Consideraciones
 
-- [Docker Desktop WSL 2 backend - Official Docs](https://docs.docker.com/desktop/wsl/)
-    
-- [Microsoft Learn: Best practices for setting up Docker on WSL 2](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers)
-    
-- [Ubuntu Wiki: Docker on WSL2](https://www.google.com/search?q=https://ubuntu.com/tutorials/install-and-configure-docker-inside-wsl-2)
+Uso recomendado
+
+- Ejecutar Docker desde WSL
     
 
-### Documentación Relacionada
+Optimización
 
-[[01 - Conceptos fundamentales de Docker]]
-[[01 - Git]]
-[[01 - Powershell]]
+- Evitar mantener Docker Desktop abierto
+    
+
+Seguridad
+
+- Gestionar correctamente permisos de usuario
+    
+
+---
+
+### Referencias externas
+
+[https://docs.docker.com/desktop/wsl/](https://docs.docker.com/desktop/wsl/)  
+[https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers)  
+[https://ubuntu.com/tutorials/install-and-configure-docker-inside-wsl-2](https://ubuntu.com/tutorials/install-and-configure-docker-inside-wsl-2)
+
+---
+
+### Documentación relacionada
+
+[[01 - Conceptos fundamentales de Docker]]  
+[[01 - Git]]  
+[[01 - Powershell]]  
 [[01 - WSL]]

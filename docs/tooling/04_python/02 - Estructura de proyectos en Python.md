@@ -1,80 +1,132 @@
-## 1. Arquitectura de Proyecto Estandarizada
+## 1. Arquitectura de proyecto estandarizada
 
-Mantener una estructura consistente en Python no solo facilita la organización personal, sino que asegura la compatibilidad con herramientas de empaquetado y facilita la integración en flujos de **CI/CD**. El siguiente esquema representa el estándar profesional para herramientas de automatización y scripts de seguridad.
+Una estructura consistente en proyectos Python facilita la organización, mejora la mantenibilidad y permite la integración con herramientas de automatización y CI/CD.
 
-### 1.1 Esquema de Directorios Recomendado
+El siguiente esquema representa una estructura base para proyectos de automatización y seguridad.
 
-Plaintext
+---
 
-```plaintext
+### 1.1 Esquema de directorios
+
+```text
 mi_proyecto/
 │
-├── .venv/               # Entorno virtual local (SIEMPRE ignorado en Git)
-├── src/                 # Código fuente del proyecto
-│   ├── __init__.py      # Convierte la carpeta en un paquete
-│   └── main.py          # Punto de entrada principal
-├── docs/                # Documentación técnica y diagramas
-├── tests/               # Scripts de prueba y validación (opcional)
-├── requirements.txt     # Listado de dependencias del proyecto
-├── .gitignore           # Definición de archivos excluidos
-└── README.md            # Manual de uso y configuración
+├── .venv/
+├── src/
+│   ├── __init__.py
+│   └── main.py
+├── docs/
+├── tests/
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
-## 2. Definición de Componentes Críticos
+---
 
-### 2.1 El Directorio `src/` (Source)
+## 2. Componentes principales
 
-Es el contenedor de la lógica de negocio. Separar el código en este directorio evita que archivos de configuración (como el `.gitignore`) se mezclen con los módulos importables.
+---
 
-- **Nota para Scripts Directos:** Para scripts de una sola tarea o de uso rápido, se puede omitir `src/` para simplificar la ejecución, pero en proyectos escalables es mandatorio.
+### 2.1 Directorio src
+
+Contiene la lógica principal del proyecto.
+
+Ventajas:
+
+- Evita mezclar código con archivos de configuración
+    
+- Facilita la importación de módulos
     
 
-### 2.2 Entorno Virtual (`.venv/`)
+Nota
 
-Contiene el intérprete de Python y las librerías instaladas específicamente para este proyecto.
-
-- **Regla de Oro:** Debe existir en la raíz pero **nunca** debe ser rastreado por Git .
-    
-
-### 2.3 Archivos de Configuración Raíz
-
-- **requirements.txt:** Archivo esencial que lista las librerías externas. Permite replicar el entorno con: `pip install -r requirements.txt`.
-    
-- **.gitignore:** Debe incluir `/ .venv /`, `__pycache__ /` y archivos de variables de entorno `.env`.
-    
-
-## 3. Jerarquía de Módulos
-
-Para asegurar que Python reconozca tus carpetas como módulos importables, es buena práctica incluir un archivo vacío llamado `__init__.py` dentro de `src/`.
-
-Python
-
-```python
-# Ejemplo de importación interna
-from src.utils import limpiador_de_logs
-```
-
-## 4. Mejores Prácticas de Organización
-
-- **Principio de Aislamiento:** Un proyecto = un entorno virtual. Nunca instales librerías de forma global para evitar conflictos de versiones.
-    
-- **Punto de Entrada Único:** Mantener `main.py` como el orquestador principal que invoca funciones de otros módulos.
-    
-- **Separación de Entornos:** No mezclar código de pruebas (`tests/`) con código funcional de producción (`src/`).
-    
-- **Documentación Activa:** El `README.md` debe explicar no solo qué hace el script, sino los comandos exactos para levantar el entorno virtual e instalar las dependencias.
+- En scripts simples puede omitirse, pero es obligatorio en proyectos escalables
     
 
 ---
 
-### Referencias Externas
+### 2.2 Entorno virtual (.venv)
 
-- [Python Packaging User Guide: Project Structure](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
+Contiene el entorno aislado del proyecto.
+
+Reglas:
+
+- Debe ubicarse en la raíz
     
-- [The Hitchhiker's Guide to Python: Structuring Your Project](https://docs.python-guide.org/writing/structure/)
+- No debe incluirse en el control de versiones
     
 
-### Documentación Relacionada
+---
 
-[[01 - Python para WSL]]
+### 2.3 Archivos de configuración
+
+requirements.txt
+
+- Lista de dependencias del proyecto
+    
+
+```bash
+pip install -r requirements.txt
+```
+
+.gitignore
+
+- Debe incluir:
+    
+    - .venv/
+        
+    - **pycache**/
+        
+    - *.env
+        
+
+---
+
+## 3. Jerarquía de módulos
+
+Para que Python reconozca los módulos, se utiliza el archivo **init**.py.
+
+Ejemplo de importación:
+
+```python
+from src.utils import limpiador_de_logs
+```
+
+---
+
+## 4. Buenas prácticas
+
+Aislamiento
+
+- Un entorno virtual por proyecto
+    
+
+Punto de entrada
+
+- main.py como orquestador principal
+    
+
+Separación
+
+- tests/ separado de src/
+    
+
+Documentación
+
+- README.md debe incluir instrucciones claras de uso y configuración
+    
+
+---
+
+### Referencias externas
+
+[https://packaging.python.org/en/latest/tutorials/packaging-projects/](https://packaging.python.org/en/latest/tutorials/packaging-projects/)  
+[https://docs.python-guide.org/writing/structure/](https://docs.python-guide.org/writing/structure/)
+
+---
+
+### Documentación relacionada
+
+[[01 - Python para WSL]]  
 [[03 - Gestión de dependencias en Python]]

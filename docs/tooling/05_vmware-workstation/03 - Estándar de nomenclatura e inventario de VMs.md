@@ -1,78 +1,201 @@
-## 1. Filosofía de Gestión de Activos
+## 1. Filosofía de gestión de activos
 
-En un entorno de laboratorio profesional, las máquinas virtuales no son archivos temporales, sino **activos de análisis**. La estandarización de sus nombres permite una identificación rápida en logs de red, reportes de Velociraptor y auditorías de seguridad.
+Las máquinas virtuales deben tratarse como activos estructurados dentro del laboratorio.
 
-## 2. Estructura de la Nomenclatura (Naming Convention)
+Una nomenclatura consistente permite:
 
-El nombre de cada VM se compone de tres bloques definidos: `[ROL]-[SISTEMA]-[ID_TEMPORAL]`
-
-### 2.1 Bloque 1: Rol del Activo (Prefijo)
-
-Define la función principal de la máquina en el laboratorio:
-
-- **ENDP:** _Endpoint_ (Objetivo de pruebas o estación de usuario).
+- Identificación rápida en logs
     
-- **DFIR:** _Digital Forensics & Incident Response_ (Análisis y recolección).
+- Correlación en herramientas de análisis
     
-- **PENT:** _Pentesting_ (Herramientas ofensivas y auditoría).
-    
-- **SERV:** _Servidor_ (Servicios de infraestructura, bases de datos).
-    
-
-### 2.2 Bloque 2: Sistema Operativo (OS)
-
-Acrónimos de tres letras para identificar la base tecnológica:
-
-- **DEB:** Debian | **FED:** Fedora | **WIN:** Windows.
-    
-- **KAL:** Kali Linux | **KALP:** Kali Linux Purple (SOC en una caja).
-    
-
-### 2.3 Bloque 3: ID Temporal y Único (DNI de la Máquina)
-
-Formato: `YYMM###`
-
-- **YY:** Año de creación (ej. `26` para 2026).
-    
-- **MM:** Mes de creación (ej. `04` para abril).
-    
-- **###:** Identificador correlativo único (DNI). **Regla de Oro:** Este número jamás se reutiliza, incluso si la VM es dada de baja.
-    
-
-## 3. Inventario Actual de Laboratorio
-
-|**Hostname**|**OS**|**IP Estática**|**Rol / Propósito**|
-|---|---|---|---|
-|**ENDP-DEB-2604007**|Debian 13|192.168.197.130|Endpoint de pruebas Linux|
-|**ENDP-FED-2604008**|Fedora 43|192.168.197.131|Endpoint de pruebas Linux|
-|**DFIR-KALP-2604009**|Kali Purple|192.168.197.133|Laboratorio de Blue Team / SOC|
-|**PENT-KAL-2604010**|Kali Linux|192.168.197.134|Pruebas de penetración|
-|**ENDP-WIN-2604012**|Windows 10|192.168.197.137|Endpoint de pruebas Windows|
-
-## 4. Ciclo de Vida del Activo
-
-1. **Alta:** Se asigna el siguiente ID disponible y se documenta en el vault de Bitwarden (IP, credenciales, propósito).
-    
-2. **Mantenimiento:** Las credenciales deben ser consistentes (`rhodyn / rhodyn`) para facilitar el acceso rápido en laboratorios aislados.
-    
-3. **Baja (Decommissioning):** Si una VM se elimina, se debe registrar en el log de Bitwarden el motivo (ej. "Corrupción de FS", "Fin de ciclo de pruebas de malware"). El ID queda "quemado" permanentemente.
-    
-
-## 5. Mejores Prácticas de Red
-
-- **IPs Estáticas:** Es fundamental mantener el direccionamiento en el rango `192.168.197.x` para que las herramientas de análisis (como dashboards de SIEM o Velociraptor) no pierdan la visibilidad del endpoint por cambios de DHCP.
-    
-- **Seguridad:** Aunque sean laboratorios, se recomienda no usar credenciales reales del host Windows.
+- Gestión ordenada del entorno
     
 
 ---
 
-### Referencias Externas
+## 2. Estructura de nomenclatura
 
-- [VMware Best Practices: Naming Conventions for Virtual Machines](https://www.google.com/search?q=https://kb.vmware.com/s/article/1003736)
+Formato general:
+
+[ROL]-[SISTEMA]-[ID]
+
+---
+
+### 2.1 Rol del activo
+
+ENDP
+
+- Endpoint de pruebas
     
 
-### Documentación Relacionada
+DFIR
 
-[[01 - Virtualización (Virtual Machines)]]
+- Análisis forense y respuesta a incidentes
+    
+
+PENT
+
+- Evaluación ofensiva
+    
+
+SERV
+
+- Servicios de infraestructura
+    
+
+---
+
+### 2.2 Sistema operativo
+
+DEB
+
+- Debian
+    
+
+FED
+
+- Fedora
+    
+
+WIN
+
+- Windows
+    
+
+KAL
+
+- Kali Linux
+    
+
+KALP
+
+- Kali Purple
+    
+
+---
+
+### 2.3 Identificador único
+
+Formato: YYMM###
+
+YY
+
+- Año de creación
+    
+
+MM
+
+- Mes de creación
+    
+
+- Identificador incremental único
+    
+
+Regla
+
+- No reutilizar identificadores
+    
+
+---
+
+## 3. Inventario de laboratorio
+
+ENDP-DEB-2604007
+
+- OS: Debian 13
+    
+- IP: 192.168.197.130
+    
+- Rol: Endpoint Linux
+    
+
+ENDP-FED-2604008
+
+- OS: Fedora 43
+    
+- IP: 192.168.197.131
+    
+- Rol: Endpoint Linux
+    
+
+DFIR-KALP-2604009
+
+- OS: Kali Purple
+    
+- IP: 192.168.197.133
+    
+- Rol: Análisis y SOC
+    
+
+PENT-KAL-2604010
+
+- OS: Kali Linux
+    
+- IP: 192.168.197.134
+    
+- Rol: Pentesting
+    
+
+ENDP-WIN-2604012
+
+- OS: Windows 10
+    
+- IP: 192.168.197.137
+    
+- Rol: Endpoint Windows
+    
+
+---
+
+## 4. Ciclo de vida
+
+Alta
+
+- Asignar ID único
+    
+- Registrar información en sistema de gestión
+    
+
+Mantenimiento
+
+- Mantener credenciales consistentes en laboratorio
+    
+
+Baja
+
+- Registrar motivo de eliminación
+    
+- No reutilizar el identificador
+    
+
+---
+
+## 5. Buenas prácticas de red
+
+Direccionamiento
+
+- Uso de IPs estáticas
+    
+
+Consistencia
+
+- Mantener rango definido para visibilidad en herramientas
+    
+
+Seguridad
+
+- No reutilizar credenciales del sistema host
+    
+
+---
+
+### Referencias externas
+
+[https://kb.vmware.com/s/article/1003736](https://kb.vmware.com/s/article/1003736)
+
+---
+
+### Documentación relacionada
+
+[[01 - Virtualización (Virtual Machines)]]  
 [[02 - Creación y configuración de una VM en VMware]]

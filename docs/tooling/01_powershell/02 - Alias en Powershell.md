@@ -1,87 +1,113 @@
-## 1. Gestión de Alias (Accesos Directos)
+## 1. Gestión de alias
 
-En PowerShell, un **Alias** es un nombre alternativo que apunta a un cmdlet, función, archivo ejecutable o script. Su objetivo principal es aumentar la velocidad operativa en la terminal reduciendo comandos extensos a abreviaturas simples.
+En PowerShell, un alias es un nombre alternativo que referencia a un cmdlet, función, ejecutable o script. Su propósito es optimizar la velocidad operativa reduciendo comandos extensos a formas abreviadas.
 
-- **Comando de asignación:** `Set-Alias`
+Comando de asignación:  
+Set-Alias
+
+Sintaxis:  
+Set-Alias <nombre_alias> <comando_original>
+
+---
+
+### 1.1 Limitación de la sesión
+
+Los alias definidos directamente en la consola son temporales. Se eliminan al cerrar la sesión de PowerShell.
+
+Para persistirlos, deben declararse en el perfil de PowerShell.
+
+---
+
+## 2. El perfil de PowerShell ($PROFILE)
+
+El perfil de PowerShell es un script que se ejecuta automáticamente al iniciar cada sesión. Cumple una función equivalente a .bashrc o .zshrc en sistemas Linux/Unix.
+
+---
+
+### 2.1 Utilidad del perfil
+
+Alias permanentes
+
+- Definición de accesos rápidos para herramientas como Git, Docker o navegación
     
-- **Sintaxis:** `Set-Alias <nombre_alias> <comando_original>`
+
+Funciones personalizadas
+
+- Automatización de tareas complejas o repetitivas
     
 
-### 1.1 Limitación de la Sesión Actual
+Variables de entorno
 
-Por defecto, los alias creados directamente en la consola son **volátiles**. Al cerrar la ventana de PowerShell, las definiciones se pierden. Para que un alias sea persistente, debe integrarse en el archivo de configuración del perfil.
-
-## 2. El Perfil de PowerShell ($PROFILE)
-
-El **PowerShell Profile** es un script que se ejecuta automáticamente al iniciar cada sesión de la terminal. Es el equivalente al archivo `.bashrc` o `.zshrc` en sistemas Linux/Unix.
-
-### 2.1 Utilidad del Perfil
-
-- **Alias Permanentes:** Definición de comandos cortos para Git, Docker o navegación.
-    
-- **Funciones Personalizadas:** Automatización de tareas complejas (como tu orquestador de Docker).
-    
-- **Variables de Entorno:** Configuración de paths de editores o herramientas.
-    
-- **Estética y Prompt:** Personalización del aspecto visual de la consola.
+- Configuración de rutas y herramientas
     
 
-## 3. Implementación y Configuración
+Personalización del entorno
 
-### 3.1 Localización y Creación
-
-PowerShell almacena la ruta del perfil en la variable automática `$PROFILE`. Para gestionarlo, sigue este flujo:
-
-PowerShell
-
-```powershell
-# 1. Verificar si el archivo ya existe físicamente
-Test-Path $PROFILE
-
-# 2. Crear el archivo (y las carpetas necesarias) si no existe
-New-Item -Path $PROFILE -ItemType File -Force
-
-# 3. Editar el perfil para agregar configuraciones
-notepad $PROFILE
-```
-
-### 3.2 Ejemplo de Configuración en el Perfil
-
-Una vez abierto el archivo en Notepad, puedes agregar líneas como estas para que estén siempre disponibles:
-
-PowerShell
-
-```powershell
-# Alias para navegación rápida
-Set-Alias -Name ll -Value Get-ChildItem
-Set-Alias -Name .. -Value "cd .."
-
-# Alias para herramientas externas
-Set-Alias -Name gs -Value "git status"
-Set-Alias -Name d -Value docker
-```
-
-## 4. Políticas de Ejecución
-
-Al intentar cargar el perfil por primera vez, es posible que PowerShell bloquee el script por motivos de seguridad.
-
-- **Error común:** `...cannot be loaded because running scripts is disabled on this system.`
-    
-- **Solución (Ejecutar como Administrador):**
-    
-    `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+- Ajustes del prompt y apariencia de la consola
     
 
 ---
 
-### Referencias Externas
+## 3. Implementación y configuración
 
-- [Microsoft Learn: About Profiles](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles)
-    
-- [Microsoft Learn: Set-Alias Cmdlet](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/set-alias)
-    
+### 3.1 Localización y creación
 
-### Documentación Relacionada
+La ruta del perfil está almacenada en la variable automática $PROFILE.
 
-[[01 - Powershell]]
+Flujo de gestión:
+
+```powershell
+# Verificar si el archivo existe
+Test-Path $PROFILE
+
+# Crear el archivo si no existe
+New-Item -Path $PROFILE -ItemType File -Force
+
+# Editar el perfil
+notepad $PROFILE
+```
+
+---
+
+### 3.2 Ejemplo de configuración
+
+Ejemplo de alias definidos en el perfil:
+
+```powershell
+# Navegación
+Set-Alias -Name ll -Value Get-ChildItem
+Set-Alias -Name .. -Value "cd .."
+
+# Herramientas externas
+Set-Alias -Name gs -Value "git status"
+Set-Alias -Name d -Value docker
+```
+
+---
+
+## 4. Políticas de ejecución
+
+Al cargar el perfil por primera vez, PowerShell puede bloquear la ejecución por restricciones de seguridad.
+
+Error común:  
+cannot be loaded because running scripts is disabled on this system
+
+Solución (ejecutar en una consola con privilegios adecuados):
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+---
+
+### Referencias externas
+
+[https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles)  
+[https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/set-alias](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/set-alias)
+
+---
+
+### Documentación relacionada
+
+[[01 - Powershell]]  
 [[04 - Automatización para Docker en PowerShell]]

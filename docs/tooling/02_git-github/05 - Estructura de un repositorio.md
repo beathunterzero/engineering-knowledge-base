@@ -1,80 +1,168 @@
-## 1. Arquitectura de un Repositorio Estándar
+Título: 05 - Estructura de un repositorio
 
-Una estructura organizada no solo facilita la colaboración, sino que permite que herramientas de automatización (CI/CD) y otros desarrolladores naveguen por el proyecto de forma intuitiva. El siguiente esquema representa el estándar adoptado para proyectos de ingeniería y documentación técnica.
+---
 
-### 1.1 Esquema de Directorios
+## 1. Arquitectura de un repositorio estándar
 
-Plaintext
+Una estructura organizada facilita la navegación del proyecto, mejora la colaboración y permite la integración con herramientas de automatización como CI/CD.
+
+El siguiente esquema representa una estructura base para proyectos de ingeniería y documentación técnica.
+
+---
+
+### 1.1 Esquema de directorios
 
 ```plaintext
 /nombre-del-proyecto
-├── README.md           # Manual de usuario y presentación
-├── .gitignore          # Reglas de exclusión de rastreo
-├── /src                # Código fuente (Source)
-├── /docs               # Documentación extendida
-└── /scripts            # Automatización y utilitarios
+├── README.md
+├── .gitignore
+├── /src
+├── /docs
+└── /scripts
 ```
 
-## 2. Definición de Componentes Raíz
+---
 
-### 2.1 README.md (El Front-End del Repo)
+## 2. Definición de componentes raíz
 
-Es el archivo que GitHub renderiza por defecto. Su propósito es responder rápidamente a las preguntas: _¿Qué es esto?_, _¿Cómo lo instalo?_ y _¿Cómo lo uso?_.
+### 2.1 README.md
 
-- **Secciones esenciales:** Descripción, Requisitos, Instalación, Guía de Uso y Licencia/Créditos.
+Es el punto de entrada del repositorio. GitHub lo renderiza automáticamente y debe proporcionar una visión general del proyecto.
+
+Debe responder a:
+
+- Qué es el proyecto
+    
+- Cómo se instala
+    
+- Cómo se utiliza
     
 
-### 2.2 .gitignore (El Filtro de Seguridad)
+Secciones recomendadas:
 
-Define qué archivos deben ser ignorados por Git para evitar subir basura técnica o datos sensibles.
-
-- **Exclusiones críticas:** `.venv/`, `.DS_Store`, `Thumbs.db`, y carpetas de configuración de herramientas como `.obsidian/`.
+- Descripción
     
-
-## 3. Propósito de las Carpetas Principales
-
-### 3.1 `/src` (Source Code)
-
-Contiene la lógica principal del proyecto. En un contexto de **Cyber Threat Hunting** o ingeniería, aquí es donde residen los artefactos ejecutables.
-
-- **Contenido:** Archivos `.ps1` (PowerShell), `.sh` (Bash), `.py` (Python) y configuraciones de infraestructura como archivos `.yaml` de Docker.
+- Requisitos
     
-
-### 3.2 `/docs` (Documentación Técnica)
-
-A diferencia del README, esta carpeta aloja manuales detallados, diagramas de arquitectura y bitácoras de procedimientos.
-
-- **Uso en tu Vault:** Guías específicas de configuración de WSL, manuales de Docker Engine y procedimientos de remediación de incidentes.
+- Instalación
     
-
-### 3.3 `/scripts` (Automatización Auxiliar)
-
-Contiene herramientas que no forman parte del "producto" principal pero que son necesarias para el entorno de trabajo.
-
-- **Ejemplos:** Scripts de "bootstrap" (instalación inicial del entorno), configuraciones de Git Hooks o scripts de limpieza de logs.
+- Uso
     
-
-## 4. Beneficios de esta Estructura
-
-- **Escalabilidad:** Permite crecer el proyecto sin desordenar la raíz.
-    
-- **Separación de Concernimientos:** Diferencia claramente entre lo que es código (`/src`), lo que es explicación (`/docs`) y lo que es soporte (`/scripts`).
-    
-- **Profesionalismo:** Cumple con las expectativas de la industria para auditorías de código y revisiones técnicas.
+- Licencia
     
 
 ---
 
-### Referencias Externas
+### 2.2 .gitignore
 
-- [GitHub: Documenting your project with READMEs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes)
+Define los archivos y directorios que Git debe ignorar.
+
+Su uso evita incluir:
+
+- Archivos temporales
     
-- [Standard Readme Specification](https://github.com/RichardLitt/standard-readme)
+- Dependencias locales
     
-- [Best Practices for File Structures in Data Science and Dev](https://drivendata.github.io/cookiecutter-data-science/)
+- Configuraciones sensibles
     
 
-### Documentación Relacionada
+Ejemplos comunes:
+
+- .venv/
+    
+- .DS_Store
+    
+- Thumbs.db
+    
+- .obsidian/
+    
+
+---
+
+## 3. Propósito de las carpetas principales
+
+### 3.1 /src
+
+Contiene la lógica principal del proyecto.
+
+En contextos de seguridad o automatización, incluye:
+
+- Scripts en PowerShell (.ps1)
+    
+- Scripts en Bash (.sh)
+    
+- Scripts en Python (.py)
+    
+- Archivos de configuración (.yaml)
+    
+
+---
+
+### 3.2 /docs
+
+Contiene documentación técnica extendida.
+
+Incluye:
+
+- Guías de configuración
+    
+- Diagramas de arquitectura
+    
+- Procedimientos operativos
+    
+
+Se diferencia del README en que aquí se almacena contenido más detallado y específico.
+
+---
+
+### 3.3 /scripts
+
+Contiene herramientas auxiliares para soporte del entorno.
+
+Ejemplos:
+
+- Scripts de inicialización (bootstrap)
+    
+- Automatización de tareas repetitivas
+    
+- Limpieza o mantenimiento
+    
+
+---
+
+## 4. Beneficios de esta estructura
+
+Escalabilidad
+
+- Permite crecimiento ordenado del proyecto
+    
+
+Separación de responsabilidades
+
+- Diferencia entre código, documentación y soporte
+    
+
+Mantenibilidad
+
+- Facilita revisiones técnicas y auditorías
+    
+
+Profesionalismo
+
+- Alineado con prácticas estándar de la industria
+    
+
+---
+
+### Referencias externas
+
+[https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes)  
+[https://github.com/RichardLitt/standard-readme](https://github.com/RichardLitt/standard-readme)  
+[https://drivendata.github.io/cookiecutter-data-science/](https://drivendata.github.io/cookiecutter-data-science/)
+
+---
+
+### Documentación relacionada
 
 [[01 - Git]]
 [[02 - Estructura de proyectos en Python]]

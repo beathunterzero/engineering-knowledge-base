@@ -1,47 +1,55 @@
-## 1. Instalación Base en Ubuntu/Debian
+## 1. Instalación base en Ubuntu/Debian
 
-En sistemas Linux bajo WSL, Python suele venir preinstalado, pero frecuentemente carece de los módulos necesarios para la gestión de entornos virtuales y el gestor de paquetes `pip`. Es imperativo estandarizar la versión de ejecución para evitar discrepancias entre el desarrollo y el despliegue de herramientas de CTH.
+En entornos Linux bajo WSL, Python puede venir preinstalado, pero no siempre incluye herramientas necesarias como pip o soporte completo para entornos virtuales.
 
-### 1.1 Preparación del Sistema
+Es necesario estandarizar la versión de Python para evitar inconsistencias entre desarrollo y ejecución.
 
-Bash
+---
+
+### 1.1 Preparación del sistema
 
 ```bash
-# Actualizar repositorios e instalar paquetes core
+# Actualizar repositorios
 sudo apt update
-sudo apt install python3 python3-pip
 
-# Instalar versión específica y entorno completo
-sudo apt install python3.12-venv python3.12-full
+# Instalar Python y pip
+sudo apt install python3 python3-pip -y
+
+# Instalar versión específica con soporte completo
+sudo apt install python3.12-venv python3.12-full -y
 ```
 
-- **Nota técnica:** El paquete `python3.12-full` garantiza que se incluyan librerías estándar extendidas que a veces se omiten en instalaciones minimalistas de WSL.
+Nota técnica
+
+- El paquete python3.12-full incluye módulos adicionales que pueden no estar presentes en instalaciones mínimas
     
 
-## 2. Gestión de Entornos Virtuales (Workflow Estándar)
+---
 
-Para mantener la integridad de tu sistema operativo Linux en WSL, la creación de un entorno aislado por proyecto no es opcional, es una **regla obligatoria**.
+## 2. Gestión de entornos virtuales
 
-### 2.1 Creación y Activación
+El uso de entornos virtuales es obligatorio para aislar dependencias por proyecto.
 
-Bash
+---
+
+### 2.1 Creación y activación
 
 ```bash
-# 1. Crear entorno con versión explícita
+# Crear entorno
 python3.12 -m venv .venv
 
-# 2. Activar entorno
+# Activar entorno
 source .venv/bin/activate
 
-# 3. Actualizar el gestor de paquetes dentro del entorno
+# Actualizar pip
 python -m pip install --upgrade pip
 ```
 
-### 2.2 Método de Recuperación (Fallback)
+---
 
-Si la instalación de `pip` falla o el entorno se crea corrupto, utiliza `ensurepip` para forzar la disponibilidad del gestor:
+### 2.2 Método de recuperación
 
-Bash
+Si el entorno falla o pip no está disponible:
 
 ```bash
 rm -rf .venv
@@ -51,39 +59,63 @@ python3 -m ensurepip --upgrade
 python -m pip install --upgrade pip
 ```
 
-## 3. Comandos de Verificación y Cierre
+---
 
-Para asegurar que el contexto de ejecución es el correcto, valida siempre las rutas de los binarios:
+## 3. Verificación y cierre
 
-- **Verificación:** `python --version` (Debe retornar 3.12.x).
+Verificación
+
+- python --version (debe mostrar 3.12.x)
     
-- **Finalización:** Para salir del entorno y volver al Python del sistema, ejecuta `deactivate`.
+
+Salida del entorno
+
+- deactivate
     
-
-## 4. Reglas de Oro para Proyectos Python en WSL
-
-| **Regla**             | **Descripción**                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
-| **Versión Explícita** | Usar siempre `python3.12` en lugar de `python3` para evitar cambios por actualizaciones del SO. |
-| **Estandarización**   | El entorno virtual **siempre** debe llamarse `.venv` y residir en la raíz del proyecto.         |
-| **Aislamiento**       | Prohibido instalar librerías con `pip` fuera de un entorno activado.                            |
-| **Seguridad**         | El directorio `.venv` debe estar listado en el `.gitignore` global.                             |
-| **Ciclo de Vida**     | Revisión y regeneración anual de entornos programada para **Abril 2027**.                       |
 
 ---
 
-### Referencias Externas
+## 4. Reglas de uso
 
-- [Ubuntu Documentation: Python in Ubuntu](https://www.google.com/search?q=https://ubuntu.com/tutorials/install-python%231-overview)
+Versión
+
+- Utilizar python3.12 de forma explícita
     
-- [Python.org: venv — Creation of virtual environments](https://docs.python.org/3/library/venv.html)
+
+Estandarización
+
+- El entorno virtual debe llamarse .venv
     
 
-### Documentación Relacionada
+Aislamiento
 
-[[02 - Estructura de proyectos en Python]]
-[[03 - Gestión de dependencias en Python]]
-[[04 - Automatización y scripting en Python]]
-[[05 - Buenas prácticas en Python]]
-[[01 - Powershell]]
+- No instalar dependencias fuera de un entorno activo
+    
+
+Control de versiones
+
+- Incluir .venv en .gitignore
+    
+
+Mantenimiento
+
+- Regenerar entornos periódicamente según ciclo definido
+    
+
+---
+
+### Referencias externas
+
+[https://ubuntu.com/tutorials/install-python#1-overview](https://ubuntu.com/tutorials/install-python#1-overview)  
+[https://docs.python.org/3/library/venv.html](https://docs.python.org/3/library/venv.html)
+
+---
+
+### Documentación relacionada
+
+[[02 - Estructura de proyectos en Python]]  
+[[03 - Gestión de dependencias en Python]]  
+[[04 - Automatización y scripting en Python]]  
+[[05 - Buenas prácticas en Python]]  
+[[01 - Powershell]]  
 [[01 - WSL]]

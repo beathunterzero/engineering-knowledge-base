@@ -554,16 +554,17 @@ if __name__ == "__main__":
     - Si el usuario interrumpe con Ctrl+C (`KeyboardInterrupt`), muestra mensaje y sale con código 0.
     - Si ocurre cualquier otra excepción, muestra el error y sale con código 1.
 
-*****************
-### Referencias Externas
+---
 
-- [Python Cryptography: Fernet vs AEAD](https://www.google.com/search?q=https://cryptography.io/en/latest/hazmat/primitives/ciphers/aead/)
-    
-- [NIST: Recommendation for Key Derivation (PBKDF2)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf)
-    
+## Referencias externas
 
-### Documentación Relacionada
+[https://cryptography.io/en/latest/hazmat/primitives/ciphers/aead/](https://cryptography.io/en/latest/hazmat/primitives/ciphers/aead/)  
+[https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf)
 
-[[01 - Python para WSL]]
-[[01 - Git]]
+---
+
+## Documentación relacionada
+
+[[01 - Python para WSL]]  
+[[01 - Git]]  
 [[01 - WSL]]

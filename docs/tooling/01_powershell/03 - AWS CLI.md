@@ -1,82 +1,128 @@
-## 1. Definición y Propósito
+## 1. Definición y propósito
 
-La **AWS CLI** es una herramienta de código abierto que permite interactuar con los servicios de Amazon Web Services mediante comandos en el shell. Para un perfil orientado a **Cloud Security** e **Incident Response**, la CLI es vital para realizar auditorías rápidas, extraer evidencias de logs y gestionar infraestructura sin depender de la consola web.
+La AWS CLI es una herramienta de línea de comandos que permite interactuar con servicios de Amazon Web Services desde el shell.
 
-## 2. Instalación y Verificación (Windows)
+Para perfiles orientados a Cloud Security e Incident Response, es una herramienta clave para:
 
-En Windows, el método más eficiente y moderno es utilizar el gestor de paquetes nativo `winget`.
+- Auditorías rápidas de infraestructura
+    
+- Extracción de evidencias desde logs y servicios
+    
+- Automatización de tareas sin depender de la consola web
+    
 
-PowerShell
+---
+
+## 2. Instalación y verificación (Windows)
+
+En entornos Windows, el método recomendado es el uso de winget.
 
 ```powershell
-# 1. Instalación mediante Windows Package Manager
+# Instalación
 winget install Amazon.AWSCLI
 
-# 2. Reiniciar la terminal y verificar versión
+# Verificación
 aws --version
 ```
 
-## 3. Configuración de Identidad
+---
 
-Antes de ejecutar comandos, es necesario vincular la CLI con una identidad de IAM (_Identity and Access Management_).
+## 3. Configuración de identidad
 
-### 3.1 Inicialización de Credenciales
+Antes de ejecutar comandos, es necesario asociar la CLI a una identidad de IAM (Identity and Access Management).
 
-Ejecuta el comando interactivo:
+---
 
-Bash
+### 3.1 Inicialización de credenciales
 
 ```bash
 aws configure
 ```
 
-El sistema solicitará cuatro parámetros críticos:
+Se solicitarán los siguientes parámetros:
 
-1. **AWS Access Key ID:** El identificador de tu clave.
+- AWS Access Key ID
     
-2. **AWS Secret Access Key:** La clave secreta (solo se muestra al crear el usuario en AWS).
+- AWS Secret Access Key
     
-3. **Default region name:** Ej. `us-east-1`.
+- Default region (ej. us-east-1)
     
-4. **Default output format:** Ej. `json` o `table`.
-    
-
-### 3.2 Almacenamiento Local de Secretos
-
-Las credenciales se almacenan de forma local en archivos de texto plano. Es fundamental no compartir el acceso a esta carpeta:
-
-- **Ubicación:** `~/.aws/credentials`
-    
-- **Comando de lectura (PowerShell):** `Get-Content ~/.aws/credentials`
+- Default output format (json o table)
     
 
-## 4. Comandos Esenciales de Gestión
+---
 
-Operaciones rápidas para auditoría y administración de recursos comunes:
+### 3.2 Almacenamiento local de credenciales
 
-|**Servicio**|**Comando**|**Propósito Técnico**|
-|---|---|---|
-|**S3**|`aws s3 ls`|Listado de buckets para auditoría de almacenamiento.|
-|**EC2**|`aws ec2 describe-instances`|Inventario de servidores y estado de ejecución.|
-|**IAM**|`aws iam list-users`|Revisión de identidades activas en el tenant.|
-|**S3**|`aws s3 cp <file> s3://<bucket>/`|Exfiltración controlada o respaldo de evidencias.|
+Las credenciales se almacenan en archivos locales en texto plano.
 
-### 4.1 Control de Salida (`--output`)
+Ubicación:  
+~/.aws/credentials
 
-La CLI permite moldear la respuesta según la necesidad del analista:
+Lectura desde PowerShell:
 
-- **`json`:** Ideal para automatización y parsing con herramientas como `jq`.
+```powershell
+Get-Content ~/.aws/credentials
+```
+
+Es importante restringir el acceso a este archivo.
+
+---
+
+## 4. Comandos esenciales de gestión
+
+Operaciones comunes para auditoría y administración:
+
+S3  
+aws s3 ls
+
+- Lista buckets disponibles
     
-- **`table`:** Recomendado para lectura humana y reportes rápidos.
+
+EC2  
+aws ec2 describe-instances
+
+- Inventario de instancias y estado
     
-- **`text`:** Útil para procesamiento simple en scripts de Bash o PowerShell.
+
+IAM  
+aws iam list-users
+
+- Lista identidades activas
     
 
-## 5. Automatización con Alias en PowerShell
+S3 (transferencia)  
+aws s3 cp s3:///
 
-Para optimizar el flujo de trabajo en incidentes, integra estos alias en tu `$PROFILE`:
+- Transferencia de archivos (respaldo o movimiento de evidencias)
+    
 
-PowerShell
+---
+
+### 4.1 Control de salida (--output)
+
+Permite definir el formato de salida según el caso de uso:
+
+json
+
+- Ideal para automatización y parsing
+    
+
+table
+
+- Recomendado para lectura humana
+    
+
+text
+
+- Útil para procesamiento en scripts
+    
+
+---
+
+## 5. Automatización con alias en PowerShell
+
+Ejemplo de alias para optimizar flujo de trabajo:
 
 ```powershell
 Set-Alias awsec2 "aws ec2 describe-instances --output table"
@@ -84,27 +130,40 @@ Set-Alias awss3 "aws s3 ls"
 Set-Alias awsiam "aws iam list-users --output table"
 ```
 
-## 6. Buenas Prácticas de Seguridad (Cloud Hardening)
+---
 
-- **Principio de Menor Privilegio:** Evitar el uso de `AdministratorAccess` para tareas diarias; usar políticas granulares.
+## 6. Buenas prácticas de seguridad
+
+Principio de menor privilegio
+
+- Evitar el uso de permisos amplios como AdministratorAccess
     
-- **Higiene de Secretos:** **Nunca** incluir `Access Keys` en archivos de configuración que se suban a GitHub.
+
+Gestión de secretos
+
+- No almacenar Access Keys en repositorios o archivos expuestos
     
-- **Autenticación Fuerte:** Habilitar **MFA** (Multi-Factor Authentication) incluso para el acceso vía CLI.
+
+Autenticación fuerte
+
+- Habilitar MFA para accesos CLI
     
-- **Rotación:** Cambiar las claves de acceso periódicamente (cada 90 días) para mitigar el impacto de una posible fuga.
+
+Rotación de credenciales
+
+- Cambiar claves periódicamente para reducir riesgo
     
 
 ---
 
-### Referencias Externas
+### Referencias externas
 
-- [AWS CLI User Guide: Configuring the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
-    
-- [AWS IAM Best Practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
-    
+[https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)  
+[https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
 
-### Documentación Relacionada
+---
 
-[[01 - Powershell]]
+### Documentación relacionada
+
+[[01 - Powershell]]  
 [[04 - Azure CLI]]
